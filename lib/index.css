@@ -1,0 +1,112 @@
+/*
+ *  Power BI Visualizations
+ *
+ *  Copyright (c) Microsoft Corporation
+ *  All rights reserved.
+ *  MIT License
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the ""Software""), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ */
+.tooltip-container {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: default;
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+  display: flex;
+}
+.tooltip-container.left {
+  flex-direction: row;
+}
+.tooltip-container.right {
+  flex-direction: row-reverse;
+}
+.tooltip-container .tooltip-content-container {
+  padding: 12px;
+  max-width: 520px;
+  font-size: 11px;
+  background-color: #333333;
+}
+.tooltip-container div.tooltip-header {
+  word-wrap: break-word;
+  max-width: 260px;
+  font-weight: bold;
+  color: #FFF;
+  letter-spacing: 1px;
+  padding-bottom: 4px;
+}
+.tooltip-container .tooltip-row {
+  display: table-row;
+}
+.tooltip-container div.tooltip-color-cell {
+  display: table-cell;
+  vertical-align: top;
+  max-width: 13px;
+  padding-right: 4px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+.tooltip-container div.tooltip-title-cell {
+  display: table-cell;
+  word-wrap: break-word;
+  font-family: helvetica, arial, sans-serif;
+  text-transform: uppercase;
+  max-width: 260px;
+  padding-right: 12px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  color: #A6A6A6;
+}
+.tooltip-container div.tooltip-value-cell {
+  display: table-cell;
+  word-wrap: break-word;
+  font-family: helvetica, arial, sans-serif;
+  max-width: 260px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  font-weight: bold;
+  color: #FFF;
+  letter-spacing: 1px;
+}
+.tooltip-container .arrow {
+  width: 0;
+  height: 0;
+}
+.tooltip-container .arrow.top {
+  margin-top: 7px;
+  align-self: flex-start;
+}
+.tooltip-container .arrow.bottom {
+  margin-bottom: 7px;
+  align-self: flex-end;
+}
+.tooltip-container .arrow.left {
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid #333333;
+}
+.tooltip-container .arrow.right {
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid #333333;
+}
