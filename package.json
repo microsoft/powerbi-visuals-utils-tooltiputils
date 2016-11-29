@@ -30,9 +30,9 @@
     "lessc": "lessc src/legacy/styles/style.less lib/index.css"
   },
   "devDependencies": {
-    "powerbi-visuals-utils-dataviewutils": "git+https://github.com/ignatvilesov/powerbi-visuals-utils-dataviewutils.git",
-    "powerbi-visuals-utils-testutils": "git+https://github.com/ignatvilesov/powerbi-visuals-utils-testutils.git",
-    "powerbi-visuals-utils-typeutils": "git+https://github.com/ignatvilesov/powerbi-visuals-utils-typeutils.git",
+    "powerbi-visuals-utils-dataviewutils": "0.1.0",
+    "powerbi-visuals-utils-testutils": "0.1.0",
+    "powerbi-visuals-utils-typeutils": "0.1.0",
     "@types/jasmine": "2.5.37",
     "globalize": "0.1.0-a2",
     "jasmine": "2.5.2",
@@ -49,8 +49,8 @@
     "typings": "2.0.0"
   },
   "dependencies": {
-    "powerbi-visuals-utils-formattingutils": "git+https://github.com/ignatvilesov/powerbi-visuals-utils-formattingutils.git",
-    "powerbi-visuals-utils-svgutils": "git+https://github.com/ignatvilesov/powerbi-visuals-utils-svgutils.git",
+    "powerbi-visuals-utils-formattingutils": "0.1.0",
+    "powerbi-visuals-utils-svgutils": "0.1.0",
     "d3": "3.5.5",
     "lodash": "4.16.2"
   }
