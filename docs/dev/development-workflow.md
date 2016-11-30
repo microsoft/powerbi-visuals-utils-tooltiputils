@@ -39,13 +39,13 @@ npm run typings:install
 The repository is ready for development now.
 
 ## How to build
-We use [Less](https://github.com/less/less.js) and [TypeScript](https://github.com/Microsoft/TypeScript) for the repository. To build source code you should run the following command:
+We use [TypeScript](https://github.com/Microsoft/TypeScript) for the repository. To build source code you should run the following command:
 
 ```bash
 npm run build
 ```
 
-This command compiles less code to CSS and TypeScript code to JavaScript. The result of the compilation is available in the ```lib``` directory.
+This command compiles TypeScript code to JavaScript. The result of the compilation is available in the ```lib``` directory.
 
 ## How to lint the source code
 We use [TSLint](https://github.com/palantir/tslint) as a linter for TypeScript code. To check source code you should run the following command:

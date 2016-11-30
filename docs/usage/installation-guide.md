@@ -4,7 +4,6 @@ If you would like to install the Power BI visuals TooltipUtils to your custom vi
 * [Installation](#installation)
 * [Including declarations to the build flow](#including-declarations-to-the-build-flow)
 * [Including JavaScript artifacts to the custom visual](#including-javascript-artifacts-to-the-custom-visual)
-* [Including CSS artifacts to the custom visual](#including-css-artifacts-to-the-custom-visual)
 
 ## Requirements
 To use the package you should have the following things:
@@ -28,7 +27,7 @@ npm install typings -g
 
 After that, you should run the following command in the directory with your current custom visual:
 ```bash
-typings install --save --global dt~d3 dt~jquery dt~lodash
+typings install --save --global dt~d3
 ```
 
 This command installs type declarations to the ```typings``` directory. These declarations are necessary for TypeScript compiler and Intellisense.
@@ -36,8 +35,6 @@ This command installs type declarations to the ```typings``` directory. These de
 ## Including declarations to the build flow
 The package contains ```d.ts``` declarations file, it's necessary for TypeScript compiler and it helps to develop your visuals fast and confident. You should add the following files to the ```files``` property of ```tsconfig.json```:
 * ```typings/index.d.ts```
-* ```node_modules/powerbi-visuals-utils-svgutils/lib/index.d.ts```
-* ```node_modules/powerbi-visuals-utils-formattingutils/lib/index.d.ts```
 * ```node_modules/powerbi-visuals-utils-tooltiputils/lib/index.d.ts```
 
 As a result you will have the following file structure:
@@ -46,8 +43,6 @@ As a result you will have the following file structure:
   "compilerOptions": {...},
   "files": [
     "typings/index.d.ts",
-    "node_modules/powerbi-visuals-utils-svgutils/lib/index.d.ts",
-    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.d.ts",
     "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.d.ts"
   ]
 }
@@ -55,13 +50,7 @@ As a result you will have the following file structure:
 
 ## Including JavaScript artifacts to the custom visual
 To use the package with your custom visuals you should add the following files to the ```externalJS``` property of ```pbiviz.json``` :
-* ```node_modules/jquery/dist/jquery.min.js```
 * ```node_modules/d3/d3.min.js```
-* ```node_modules/lodash/lodash.min.js```
-* ```node_modules/globalize/lib/globalize.js```
-* ```node_modules/globalize/lib/cultures/globalize.culture.en-US.js```
-* ```node_modules/powerbi-visuals-utils-svgutils/lib/index.js```
-* ```node_modules/powerbi-visuals-utils-formattingutils/lib/index.js```
 * ```node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js```
 
 As a result you will have the following file structure:
@@ -72,30 +61,12 @@ As a result you will have the following file structure:
   "author": {...},
   "assets": {...},
   "externalJS": [
-    "node_modules/jquery/dist/jquery.min.js",
     "node_modules/d3/d3.min.js",
-    "node_modules/lodash/lodash.min.js",
-    "node_modules/globalize/lib/globalize.js",
-    "node_modules/globalize/lib/cultures/globalize.culture.en-US.js",
-    "node_modules/powerbi-visuals-utils-svgutils/lib/index.js",
-    "node_modules/powerbi-visuals-utils-formattingutils/lib/index.js",
     "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.js"
   ],
   "style": ...,
   "capabilities": ...
 }
 ```
-
-## Including CSS artifacts to the custom visual
-To use the package with your custom visuals you should import the following CSS file to your ```.less``` file:
-
-* ```node_modules/powerbi-visuals-utils-tooltiputils/lib/index.css```
-
-As a result you will have the following file structure:
-```less
-@import (less) "node_modules/powerbi-visuals-utils-tooltiputils/lib/index.css";
-```
-
-Please note, you should import ```.css``` file as ```.less``` file, because Power BI Visuals Tools wraps the external CSS rules.
 
 That's it. :rocket: :metal: That's a good time to read our [Usage Guide](./usage-guide.md).
