@@ -31,6 +31,7 @@ declare module powerbi.extensibility.utils.tooltip {
         private handleTouchDelay;
         constructor(tooltipService: ITooltipService, rootElement: Element, handleTouchDelay?: number);
         addTooltip<T>(selection: d3.Selection<any>, getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => VisualTooltipDataItem[], getDataPointIdentity?: (args: TooltipEventArgs<T>) => ISelectionId, reloadTooltipDataOnMouseMove?: boolean): void;
+        private getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
         hide(): void;
         private makeTooltipEventArgs<T>(rootNode, isPointerEvent, isTouchEvent);
         private canDisplayTooltip(d3Event);

@@ -91,14 +91,13 @@ module powerbi.extensibility.utils.tooltip {
                     return;
                 }
 
-                let selectionId: ISelectionId = getDataPointIdentity
-                    && getDataPointIdentity(tooltipEventArgs);
+                let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
 
                 this.visualHostTooltipService.show({
                     coordinates: tooltipEventArgs.coordinates,
                     isTouchEvent: false,
                     dataItems: tooltipInfo,
-                    identities: selectionId ? [selectionId] : [],
+                    identities: selectionIds
                 });
             });
 
@@ -129,13 +128,13 @@ module powerbi.extensibility.utils.tooltip {
                     }
                 }
 
-                let selectionId: ISelectionId = getDataPointIdentity(tooltipEventArgs);
+                let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
 
                 this.visualHostTooltipService.move({
                     coordinates: tooltipEventArgs.coordinates,
                     isTouchEvent: false,
                     dataItems: tooltipInfo,
-                    identities: selectionId ? [selectionId] : [],
+                    identities: selectionIds
                 });
             });
 
@@ -157,13 +156,13 @@ module powerbi.extensibility.utils.tooltip {
                 }
 
                 let tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs),
-                    selectionId = getDataPointIdentity(tooltipEventArgs);
+                    selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
 
                 this.visualHostTooltipService.show({
                     coordinates: tooltipEventArgs.coordinates,
                     isTouchEvent: true,
                     dataItems: tooltipInfo,
-                    identities: selectionId ? [selectionId] : [],
+                    identities: selectionIds
                 });
             });
 
@@ -183,6 +182,19 @@ module powerbi.extensibility.utils.tooltip {
                     this.handleTouchTimeoutId = undefined;
                 }, this.handleTouchDelay);
             });
+        }
+
+        private getSelectionIds<T>(
+            tooltipEventArgs: TooltipEventArgs<T>,
+            getDataPointIdentity: (args: TooltipEventArgs<T>) => ISelectionId): ISelectionId[] {
+
+            const selectionId: ISelectionId = getDataPointIdentity
+                ? getDataPointIdentity(tooltipEventArgs)
+                : null;
+
+            return selectionId
+                ? [selectionId]
+                : [];
         }
 
         public hide(): void {

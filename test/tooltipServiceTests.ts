@@ -40,18 +40,8 @@ module powerbi.extensibility.utils.tooltip.test {
 
     // powerbi.extensibility.utils.tooltip
     import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
-    // import createTooltipService = powerbi.extensibility.utils.tooltip.createTooltipService;
     import ITooltipServiceWrapper = powerbi.extensibility.utils.tooltip.ITooltipServiceWrapper;
     import TooltipServiceWrapper = powerbi.extensibility.utils.tooltip.TooltipServiceWrapper;
-
-    // describe("createTooltipService", () => {
-    //     it("returns legacy tooltip service when no host tooltip service is available", () => {
-    //         let mockHostServices = createVisualHost();
-    //         let tooltipService = createTooltipService(mockHostServices);
-
-    //         expect(tooltipService.constructor).toBe(LegacyTooltipService);
-    //     });
-    // });
 
     describe("TooltipService", () => {
         const handleTouchDelay: number = 10;
