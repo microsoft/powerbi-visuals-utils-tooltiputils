@@ -27,8 +27,7 @@
 'use strict';
 
 const recursivePathToTests = 'test/**/*.ts'
-    , indexFile = 'lib/index.js'
-    , indexCss = 'lib/index.css';
+    , indexFile = 'lib/index.js';
 
 module.exports = (config) => {
     let browsers = [];
@@ -54,16 +53,8 @@ module.exports = (config) => {
         files: [
             'node_modules/jquery/dist/jquery.min.js',
             'node_modules/d3/d3.min.js',
-            'node_modules/lodash/lodash.min.js',
             'node_modules/jasmine-jquery/lib/jasmine-jquery.js',
-            'node_modules/globalize/lib/globalize.js',
-            'node_modules/globalize/lib/cultures/globalize.culture.en-US.js',
-            'node_modules/powerbi-visuals-utils-typeutils/lib/index.js',
-            'node_modules/powerbi-visuals-utils-dataviewutils/lib/index.js',
-            'node_modules/powerbi-visuals-utils-svgutils/lib/index.js',
-            'node_modules/powerbi-visuals-utils-formattingutils/lib/index.js',
             'node_modules/powerbi-visuals-utils-testutils/lib/index.js',
-            indexCss,
             indexFile,
             recursivePathToTests
         ],

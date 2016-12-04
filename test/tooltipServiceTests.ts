@@ -30,6 +30,9 @@ module powerbi.extensibility.utils.tooltip.test {
     // powerbi.visuals
     import ISelectionId = powerbi.visuals.ISelectionId;
 
+    // powerbi.extensibility
+    import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+
     import createVisualHost = powerbi.extensibility.utils.test.mocks.createVisualHost;
     import testDom = powerbi.extensibility.utils.test.helpers.testDom;
     import createTouchesList = powerbi.extensibility.utils.test.helpers.createTouchesList;
@@ -37,62 +40,50 @@ module powerbi.extensibility.utils.tooltip.test {
 
     // powerbi.extensibility.utils.tooltip
     import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
-    import VisualTooltipDataItem = powerbi.extensibility.utils.tooltip.VisualTooltipDataItem;
-    import LegacyTooltipService = powerbi.extensibility.utils.tooltip.LegacyTooltipService;
-    import createTooltipService = powerbi.extensibility.utils.tooltip.createTooltipService;
-    import ITooltipService = powerbi.extensibility.utils.tooltip.ITooltipService;
-    import TooltipService = powerbi.extensibility.utils.tooltip.TooltipService;
-
-    describe("createTooltipService", () => {
-        it("returns legacy tooltip service when no host tooltip service is available", () => {
-            let mockHostServices = createVisualHost();
-            let tooltipService = createTooltipService(mockHostServices);
-
-            expect(tooltipService.constructor).toBe(LegacyTooltipService);
-        });
-    });
+    import ITooltipServiceWrapper = powerbi.extensibility.utils.tooltip.ITooltipServiceWrapper;
+    import TooltipServiceWrapper = powerbi.extensibility.utils.tooltip.TooltipServiceWrapper;
 
     describe("TooltipService", () => {
-        let tooltipService: TooltipService;
-        let hostVisualTooltip: IMockHostTooltipService;
+        const handleTouchDelay: number = 10;
+
+        let tooltipService: TooltipServiceWrapper,
+            hostVisualTooltip: IMockHostTooltipService,
+            onSpy: jasmine.Spy,
+            d3Selection: d3.Selection<any>,
+            tooltipRoot: JQuery,
+            element: JQuery;
 
         beforeEach(() => {
             hostVisualTooltip = jasmine.createSpyObj("tooltipService", [
                 "show",
                 "move",
                 "hide",
-                "container",
                 "enabled"
             ]);
 
             hostVisualTooltip.enabled.and.returnValue(true);
 
-            tooltipService = new TooltipService(hostVisualTooltip, /* handleTouchDelay */ 10);
+            tooltipRoot = testDom("100px", "100px");
+
+            // avoids having to deal with offset mouse coordinates.
+            tooltipRoot.css({
+                position: "absolute",
+                top: 0,
+                left: 0,
+            });
+
+            element = $("<div>").appendTo(tooltipRoot);
+
+            d3Selection = d3.select(element.get(0));
+            onSpy = spyOn(d3Selection, "on").and.callThrough();
+
+            tooltipService = new TooltipServiceWrapper(
+                hostVisualTooltip,
+                tooltipRoot.get(0),
+                handleTouchDelay);
         });
 
         describe("addTooltip", () => {
-            let onSpy: jasmine.Spy;
-            let d3Selection: d3.Selection<any>;
-            let tooltipRoot: JQuery;
-            let element: JQuery;
-
-            beforeEach(() => {
-                tooltipRoot = testDom("100px", "100px");
-                // avoids having to deal with offset mouse coords
-                tooltipRoot.css({
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                });
-
-                element = $("<div>").appendTo(tooltipRoot);
-
-                d3Selection = d3.select(element.get(0));
-                onSpy = spyOn(d3Selection, "on").and.callThrough();
-
-                hostVisualTooltip.container.and.returnValue(tooltipRoot.get(0));
-            });
-
             it("events are added to selection", () => {
                 tooltipService.addTooltip(
                     d3Selection,
@@ -405,7 +396,6 @@ module powerbi.extensibility.utils.tooltip.test {
             show: jasmine.Spy;
             move: jasmine.Spy;
             hide: jasmine.Spy;
-            container: jasmine.Spy;
             enabled: jasmine.Spy;
         }
     });

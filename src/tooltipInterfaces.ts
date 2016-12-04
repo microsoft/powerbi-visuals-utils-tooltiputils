@@ -36,48 +36,16 @@ module powerbi.extensibility.utils.tooltip {
         isTouchEvent: boolean;
     }
 
-    export interface VisualTooltipDataItem {
-        displayName: string;
-        value: string;
-        color?: string;
-        header?: string;
-        opacity?: string;
+    export interface ITooltipServiceWrapper {
+        addTooltip<T>(
+            selection: d3.Selection<any>,
+            getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => VisualTooltipDataItem[],
+            getDataPointIdentity?: (args: TooltipEventArgs<T>) => ISelectionId,
+            reloadTooltipDataOnMouseMove?: boolean): void;
+        hide(): void;
     }
 
-    export interface VisualTooltipShowEventArgs extends VisualTooltipMoveEventArgs {
-        dataItems: VisualTooltipDataItem[];
-    }
-
-    export interface VisualTooltipMoveEventArgs {
-        coordinates: number[];
-        isTouchEvent: boolean;
-        dataItems?: VisualTooltipDataItem[];
-        identities: Selector[];
-    }
-
-    export interface VisualTooltipHideEventArgs {
-        isTouchEvent: boolean;
-        immediately: boolean;
-    }
-
-    export interface IVisualHostTooltipService {
-        /** Show a tooltip. */
-        show(args: VisualTooltipShowEventArgs): void;
-
-        /** Move a visible tooltip. */
-        move(args: VisualTooltipMoveEventArgs): void;
-
-        /** Hide a tooltip. */
-        hide(args: VisualTooltipHideEventArgs): void;
-
-        /** Gets the container that tooltip elements will be appended to. */
-        container(): Element;
-
-        /** Indicates if tooltips are enabled or not. */
-        enabled(): boolean;
-    }
-
-    export interface IVisualHostServices extends IVisualHost {
-        tooltips?(): IVisualHostTooltipService;
+    export interface TooltipEnabledDataPoint {
+        tooltipInfo?: VisualTooltipDataItem[];
     }
 }

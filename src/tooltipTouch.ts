@@ -24,19 +24,32 @@
  *  THE SOFTWARE.
  */
 
-module powerbi.extensibility.utils.tooltip {
-    export class LegacyTooltipService implements ITooltipService {
-        public addTooltip<T>(
-            selection: d3.Selection<any>,
-            getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => TooltipDataItem[],
-            getDataPointIdentity: (args: TooltipEventArgs<T>) => ISelectionId,
-            reloadTooltipDataOnMouseMove?: boolean): void {
-                // Default to the old tooltip system if the host does not support tooltips.
-                tooltipManager.addTooltip(selection, getTooltipInfoDelegate, reloadTooltipDataOnMouseMove);
-            }
+module powerbi.extensibility.utils.tooltip.touch {
+    export function touchStartEventName(): string {
+        let eventName: string = "touchstart";
 
-        public hide(): void {
-            tooltipManager.ToolTipInstance.hide();
+        if (window["PointerEvent"]) {
+            // IE11
+            eventName = "pointerdown";
         }
+
+        return eventName;
+    }
+
+    export function touchEndEventName(): string {
+        let eventName: string = "touchend";
+
+        if (window["PointerEvent"]) {
+            // IE11
+            eventName = "pointerup";
+        }
+
+        return eventName;
+    }
+
+    export function usePointerEvents(): boolean {
+        let eventName: string = touchStartEventName();
+
+        return eventName === "pointerdown" || eventName === "MSPointerDown";
     }
 }
