@@ -15,7 +15,7 @@ This function creates an instance of ITooltipServiceWrapper.
 function createTooltipServiceWrapper(tooltipService: ITooltipService, rootElement: Element, handleTouchDelay?: number): ITooltipServiceWrapper;
 ```
 
-The ```ITooltipService``` is available in [IVisualHost](https://github.com/Microsoft/PowerBI-visuals-tools/blob/master/templates/visuals/.api/v1.3.0/PowerBI-visuals.d.ts#L1267).
+The ```ITooltipService``` is available in [IVisualHost](https://github.com/Microsoft/PowerBI-visuals-tools/blob/67fe16f2f4f0269bc4c79fe638d36bde47552aa3/templates/visuals/.api/v1.3.0/PowerBI-visuals.d.ts#L1267).
 
 ### Example
 
@@ -34,6 +34,8 @@ export class YourVisual implements IVisual {
     }
 }
 ```
+
+You can take a look at the example code of the custom visual [here](https://github.com/Microsoft/powerbi-visuals-sankey/blob/4d544ea145b4e15006083a3610dfead3da5f61a4/src/visual.ts#L210).
 
 ## ITooltipServiceWrapper
 This interface describes public methods of the TooltipService.
@@ -85,6 +87,8 @@ tooltipServiceWrapper.addTooltip<TooltipEnabledDataPoint>(element, (eventArgs: T
 
 // You will see a tooltip if you mouseover the element.
 ```
+
+You can take a look at the example code of the custom visual [here](https://github.com/Microsoft/powerbi-visuals-sankey/blob/4d544ea145b4e15006083a3610dfead3da5f61a4/src/visual.ts#L1088).
 
 ## ITooltipServiceWrapper.hide
 
