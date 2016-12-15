@@ -34,7 +34,7 @@ npm install typings -g
 After that, you should run the following command in the directory with your current custom visual:
 
 ```bash
-typings install --save --global dt~d3
+typings install --save --global dt~d3#0.0.0+20160907005744
 ```
 
 This command installs type declarations to the ```typings``` directory. These declarations are necessary for TypeScript compiler and Intellisense.

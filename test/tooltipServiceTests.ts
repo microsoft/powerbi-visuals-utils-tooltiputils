@@ -54,6 +54,8 @@ module powerbi.extensibility.utils.tooltip.test {
             element: JQuery;
 
         beforeEach(() => {
+            window["PointerEvent"] = null; // Note: We don't want to use PointerEvent in unit test now. We'll add some extra tests for PointerEvent.
+
             hostVisualTooltip = jasmine.createSpyObj("tooltipService", [
                 "show",
                 "move",
