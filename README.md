@@ -1,5 +1,5 @@
 # Microsoft Power BI visuals TooltipUtils
-[![Build Status](https://travis-ci.org/Microsoft/powerbi-visuals-utils-tooltiputils.svg?branch=master)](https://travis-ci.org/Microsoft/powerbi-visuals-utils-tooltiputils) [![npm version](https://img.shields.io/npm/v/powerbi-visuals-utils-tooltiputils.svg)](https://www.npmjs.com/package/powerbi-visuals-utils-tooltiputils) [![npm](https://img.shields.io/npm/dm/powerbi-visuals-utils-tooltiputils.svg)](https://www.npmjs.com/package/powerbi-visuals-utils-tooltiputils)
+[![Build Status](https://travis-ci.org/Microsoft/powerbi-visuals-utils-tooltiputils.svg?branch=master)](https://travis-ci.org/Microsoft/powerbi-visuals-utils-tooltiputils) [![Coverage Status](https://coveralls.io/repos/github/Microsoft/powerbi-visuals-utils-tooltiputils/badge.svg?branch=master)](https://coveralls.io/github/Microsoft/powerbi-visuals-utils-tooltiputils?branch=master) [![npm version](https://img.shields.io/npm/v/powerbi-visuals-utils-tooltiputils.svg)](https://www.npmjs.com/package/powerbi-visuals-utils-tooltiputils) [![npm](https://img.shields.io/npm/dm/powerbi-visuals-utils-tooltiputils.svg)](https://www.npmjs.com/package/powerbi-visuals-utils-tooltiputils)
 
 > TooltipUtils is a set of functions and classes in order to simplify usage of the Tooltip API for Power BI custom visuals
 
