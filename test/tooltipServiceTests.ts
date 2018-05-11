@@ -1,404 +1,403 @@
 /*
- *  Power BI Visualizations
- *
- *  Copyright (c) Microsoft Corporation
- *  All rights reserved.
- *  MIT License
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the ""Software""), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *  THE SOFTWARE.
- */
+*  Power BI Visualizations
+*
+*  Copyright (c) Microsoft Corporation
+*  All rights reserved.
+*  MIT License
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy
+*  of this software and associated documentation files (the ""Software""), to deal
+*  in the Software without restriction, including without limitation the rights
+*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*  copies of the Software, and to permit persons to whom the Software is
+*  furnished to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+*  THE SOFTWARE.
+*/
 
 /// <reference path="_references.ts"/>
 
-module powerbi.extensibility.utils.tooltip.test {
-    // powerbi.visuals
-    import ISelectionId = powerbi.visuals.ISelectionId;
+import { createVisualHost, testDom, createTouchesList, createTouch } from "powerbi-visuals-utils-testutils";
+import { select, Selection } from "d3-selection";
+import { TooltipEventArgs, ITooltipServiceWrapper } from "./../lib/tooltipInterfaces";
 
-    // powerbi.extensibility
-    import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+// powerbi.visuals
+import ISelectionId = powerbi.visuals.ISelectionId;
 
-    import createVisualHost = powerbi.extensibility.utils.test.mocks.createVisualHost;
-    import testDom = powerbi.extensibility.utils.test.helpers.testDom;
-    import createTouchesList = powerbi.extensibility.utils.test.helpers.createTouchesList;
-    import createTouch = powerbi.extensibility.utils.test.helpers.createTouch;
+// powerbi.extensibility
+import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 
-    // powerbi.extensibility.utils.tooltip
-    import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
-    import ITooltipServiceWrapper = powerbi.extensibility.utils.tooltip.ITooltipServiceWrapper;
-    import TooltipServiceWrapper = powerbi.extensibility.utils.tooltip.TooltipServiceWrapper;
+import { TooltipServiceWrapper, createTooltipServiceWrapper } from "./../lib/tooltipService";
 
-    describe("TooltipService", () => {
-        const handleTouchDelay: number = 10;
+// powerbi.extensibility.utils.tooltip
+// import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
+// import ITooltipServiceWrapper = powerbi.extensibility.utils.tooltip.ITooltipServiceWrapper;
+// import TooltipServiceWrapper = powerbi.extensibility.utils.tooltip.TooltipServiceWrapper;
 
-        let tooltipService: TooltipServiceWrapper,
-            hostVisualTooltip: IMockHostTooltipService,
-            onSpy: jasmine.Spy,
-            d3Selection: d3.Selection<any>,
-            tooltipRoot: JQuery,
-            element: JQuery;
+describe("TooltipService", () => {
+    const handleTouchDelay: number = 10;
 
-        beforeEach(() => {
-            window["PointerEvent"] = null; // Note: We don't want to use PointerEvent in unit test now. We'll add some extra tests for PointerEvent.
+    let tooltipService: TooltipServiceWrapper,
+        hostVisualTooltip: IMockHostTooltipService,
+        onSpy: jasmine.Spy,
+        d3Selection: Selection<any, any, any, any>,
+        tooltipRoot: JQuery,
+        element: JQuery;
 
-            hostVisualTooltip = jasmine.createSpyObj("tooltipService", [
-                "show",
-                "move",
-                "hide",
-                "enabled"
-            ]);
+    beforeEach(() => {
+        window["PointerEvent"] = null; // Note: We don't want to use PointerEvent in unit test now. We'll add some extra tests for PointerEvent.
 
-            hostVisualTooltip.enabled.and.returnValue(true);
+        hostVisualTooltip = jasmine.createSpyObj("tooltipService", [
+            "show",
+            "move",
+            "hide",
+            "enabled"
+        ]);
 
-            tooltipRoot = testDom("100px", "100px");
+        hostVisualTooltip.enabled.and.returnValue(true);
 
-            // avoids having to deal with offset mouse coordinates.
-            tooltipRoot.css({
-                position: "absolute",
-                top: 0,
-                left: 0,
-            });
+        tooltipRoot = testDom("100px", "100px");
 
-            element = $("<div>").appendTo(tooltipRoot);
-
-            d3Selection = d3.select(element.get(0));
-            onSpy = spyOn(d3Selection, "on").and.callThrough();
-
-            tooltipService = new TooltipServiceWrapper(
-                hostVisualTooltip,
-                tooltipRoot.get(0),
-                handleTouchDelay);
+        // avoids having to deal with offset mouse coordinates.
+        tooltipRoot.css({
+            position: "absolute",
+            top: 0,
+            left: 0,
         });
 
-        describe("addTooltip", () => {
-            it("events are added to selection", () => {
+        element = $("<div>").appendTo(tooltipRoot);
+
+        d3Selection = select(element.get(0));
+        onSpy = spyOn(d3Selection, "on").and.callThrough();
+
+        tooltipService = new TooltipServiceWrapper(
+            hostVisualTooltip,
+            tooltipRoot.get(0),
+            handleTouchDelay);
+    });
+
+    describe("addTooltip", () => {
+        it("events are added to selection", () => {
+            tooltipService.addTooltip(
+                d3Selection,
+                (args) => [],
+                (args) => undefined
+            );
+
+            expect(onSpy).toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
+            expect(onSpy).toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
+            expect(onSpy).toHaveBeenCalledWith("mousemove.tooltip", jasmine.any(Function));
+
+            // NOTE: likely to be different under IE
+            expect(onSpy).toHaveBeenCalledWith("touchstart.tooltip", jasmine.any(Function));
+            expect(onSpy).toHaveBeenCalledWith("touchend.tooltip", jasmine.any(Function));
+        });
+
+        it("events are not added if service is disabled", () => {
+            hostVisualTooltip.enabled.and.returnValue(false);
+            tooltipService.addTooltip(
+                d3Selection,
+                (args) => [],
+                (args) => undefined
+            );
+
+            expect(onSpy).not.toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
+            expect(onSpy).not.toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
+            expect(onSpy).not.toHaveBeenCalledWith("mousemove.tooltip", jasmine.any(Function));
+
+            // NOTE: likely to be different under IE
+            expect(onSpy).not.toHaveBeenCalledWith("touchstart.tooltip", jasmine.any(Function));
+            expect(onSpy).not.toHaveBeenCalledWith("touchend.tooltip", jasmine.any(Function));
+        });
+
+        describe("events", () => {
+            let identity: ISelectionId;
+            let tooltipData: VisualTooltipDataItem[];
+            let getTooltipInfoDelegate: jasmine.Spy;
+            let getDataPointIdentity: jasmine.Spy;
+
+            beforeEach(() => {
+                tooltipData = [{
+                    displayName: "group",
+                    value: "100",
+                }];
+
+                getTooltipInfoDelegate = jasmine.createSpy("getTooltipInfoDelegate", (args) => tooltipData).and.callThrough();
+                getDataPointIdentity = jasmine.createSpy("getDataPointIdentity", (args) => identity).and.callThrough();
+
                 tooltipService.addTooltip(
                     d3Selection,
-                    (args) => [],
-                    (args) => undefined
+                    getTooltipInfoDelegate,
+                    getDataPointIdentity
                 );
 
-                expect(onSpy).toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
-                expect(onSpy).toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
-                expect(onSpy).toHaveBeenCalledWith("mousemove.tooltip", jasmine.any(Function));
-
-                // NOTE: likely to be different under IE
-                expect(onSpy).toHaveBeenCalledWith("touchstart.tooltip", jasmine.any(Function));
-                expect(onSpy).toHaveBeenCalledWith("touchend.tooltip", jasmine.any(Function));
+                d3Selection.data(["datum"]);
             });
 
-            it("events are not added if service is disabled", () => {
-                hostVisualTooltip.enabled.and.returnValue(false);
-                tooltipService.addTooltip(
-                    d3Selection,
-                    (args) => [],
-                    (args) => undefined
-                );
+            describe("mouseover", () => {
+                it("shows tooltip", () => {
+                    element.d3MouseOver(50, 50);
 
-                expect(onSpy).not.toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
-                expect(onSpy).not.toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
-                expect(onSpy).not.toHaveBeenCalledWith("mousemove.tooltip", jasmine.any(Function));
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
 
-                // NOTE: likely to be different under IE
-                expect(onSpy).not.toHaveBeenCalledWith("touchstart.tooltip", jasmine.any(Function));
-                expect(onSpy).not.toHaveBeenCalledWith("touchend.tooltip", jasmine.any(Function));
+                    expect(hostVisualTooltip.show).toHaveBeenCalledWith({
+                        coordinates: mouseCoordinates,
+                        isTouchEvent: false,
+                        dataItems: tooltipData,
+                        identities: [],
+                    });
+                });
+
+                it("calls into visual to get identities and tooltip data", () => {
+                    element.d3MouseOver(50, 50);
+
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
+
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: "datum",
+                        coordinates: mouseCoordinates,
+                        elementCoordinates: translateMouseCoordinates(50, 50),
+                        context: element.get(0),
+                        isTouchEvent: false
+                    };
+
+                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                });
+
+                it("calls into visual even when no data", () => {
+                    d3Selection.data([undefined]);
+
+                    element.d3MouseOver(50, 50);
+
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
+
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: undefined,
+                        coordinates: mouseCoordinates,
+                        elementCoordinates: translateMouseCoordinates(50, 50),
+                        context: element.get(0),
+                        isTouchEvent: false
+                    };
+
+                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                });
+
+                it("does not show tooltip immediately after touchend", () => {
+                    element.d3TouchEnd();
+                    element.d3MouseOver(50, 50);
+
+                    expect(hostVisualTooltip.show).not.toHaveBeenCalled();
+                });
             });
 
-            describe("events", () => {
-                let identity: ISelectionId;
-                let tooltipData: VisualTooltipDataItem[];
-                let getTooltipInfoDelegate: jasmine.Spy;
-                let getDataPointIdentity: jasmine.Spy;
+            describe("mousemove", () => {
+                it("moves tooltip", () => {
+                    element.d3MouseMove(50, 50);
 
-                beforeEach(() => {
-                    tooltipData = [{
-                        displayName: "group",
-                        value: "100",
-                    }];
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
 
-                    getTooltipInfoDelegate = jasmine.createSpy("getTooltipInfoDelegate", (args) => tooltipData).and.callThrough();
-                    getDataPointIdentity = jasmine.createSpy("getDataPointIdentity", (args) => identity).and.callThrough();
+                    expect(hostVisualTooltip.move).toHaveBeenCalledWith({
+                        coordinates: mouseCoordinates,
+                        isTouchEvent: false,
+                        dataItems: undefined,
+                        identities: [],
+                    });
+                });
 
+                it("calls into visual to get identities", () => {
+                    element.d3MouseMove(50, 50);
+
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
+
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: "datum",
+                        coordinates: mouseCoordinates,
+                        elementCoordinates: translateMouseCoordinates(50, 50),
+                        context: element.get(0),
+                        isTouchEvent: false
+                    };
+
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                });
+
+                it("calls into visual to get identities even when no data", () => {
+                    d3Selection.data([undefined]);
+
+                    element.d3MouseMove(50, 50);
+
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
+
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: undefined,
+                        coordinates: mouseCoordinates,
+                        elementCoordinates: translateMouseCoordinates(50, 50),
+                        context: element.get(0),
+                        isTouchEvent: false
+                    };
+
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                });
+
+                it("does not reload tooltip data if reloadTooltipDataOnMouseMove is false", () => {
+                    // reloadTooltipDataOnMouseMove is false by default
+                    element.d3MouseMove(50, 50);
+
+                    expect(getTooltipInfoDelegate).not.toHaveBeenCalled();
+                });
+
+                it("reloads tooltip data if reloadTooltipDataOnMouseMove is true", () => {
                     tooltipService.addTooltip(
                         d3Selection,
                         getTooltipInfoDelegate,
-                        getDataPointIdentity
+                        getDataPointIdentity,
+                        true /* reloadTooltipDataOnMouseMove */
                     );
 
-                    d3Selection.data(["datum"]);
+                    element.d3MouseMove(50, 50);
+
+                    let mouseCoordinates = translateMouseCoordinates(50, 50);
+
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: "datum",
+                        coordinates: mouseCoordinates,
+                        elementCoordinates: translateMouseCoordinates(50, 50),
+                        context: element.get(0),
+                        isTouchEvent: false
+                    };
+
+                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
+
+                    expect(hostVisualTooltip.move).toHaveBeenCalledWith({
+                        coordinates: mouseCoordinates,
+                        isTouchEvent: false,
+                        dataItems: tooltipData,
+                        identities: [],
+                    });
                 });
+            });
 
-                describe("mouseover", () => {
-                    it("shows tooltip", () => {
-                        element.d3MouseOver(50, 50);
+            describe("mouseout", () => {
+                it("hides tooltip", () => {
+                    element.d3MouseOut(0, 0);
 
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
-
-                        expect(hostVisualTooltip.show).toHaveBeenCalledWith({
-                            coordinates: mouseCoordinates,
-                            isTouchEvent: false,
-                            dataItems: tooltipData,
-                            identities: [],
-                        });
+                    expect(hostVisualTooltip.hide).toHaveBeenCalledWith({
+                        isTouchEvent: false,
+                        immediately: false,
                     });
+                });
+            });
 
-                    it("calls into visual to get identities and tooltip data", () => {
-                        element.d3MouseOver(50, 50);
+            describe("touchstart", () => {
+                it("shows tooltip", () => {
+                    element.d3TouchStart(createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
 
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
+                    let touchCoordinates = translateTouchCoordinates(50, 50, 0);
 
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: "datum",
-                            coordinates: mouseCoordinates,
-                            elementCoordinates: translateMouseCoordinates(50, 50),
-                            context: element.get(0),
-                            isTouchEvent: false
-                        };
-
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                    });
-
-                    it("calls into visual even when no data", () => {
-                        d3Selection.data([undefined]);
-
-                        element.d3MouseOver(50, 50);
-
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
-
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: undefined,
-                            coordinates: mouseCoordinates,
-                            elementCoordinates: translateMouseCoordinates(50, 50),
-                            context: element.get(0),
-                            isTouchEvent: false
-                        };
-
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                    });
-
-                    it("does not show tooltip immediately after touchend", () => {
-                        element.d3TouchEnd();
-                        element.d3MouseOver(50, 50);
-
-                        expect(hostVisualTooltip.show).not.toHaveBeenCalled();
+                    expect(hostVisualTooltip.show).toHaveBeenCalledWith({
+                        coordinates: touchCoordinates,
+                        isTouchEvent: true,
+                        dataItems: tooltipData,
+                        identities: []
                     });
                 });
 
-                describe("mousemove", () => {
-                    it("moves tooltip", () => {
-                        element.d3MouseMove(50, 50);
+                it("calls into visual to get identities and tooltip data", () => {
+                    element.d3TouchStart(createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
 
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
+                    let touchCoordinates = translateTouchCoordinates(50, 50, 0);
 
-                        expect(hostVisualTooltip.move).toHaveBeenCalledWith({
-                            coordinates: mouseCoordinates,
-                            isTouchEvent: false,
-                            dataItems: undefined,
-                            identities: [],
-                        });
-                    });
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: "datum",
+                        coordinates: touchCoordinates,
+                        elementCoordinates: translateTouchCoordinates(50, 50, 0),
+                        context: element.get(0),
+                        isTouchEvent: true
+                    };
 
-                    it("calls into visual to get identities", () => {
-                        element.d3MouseMove(50, 50);
-
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
-
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: "datum",
-                            coordinates: mouseCoordinates,
-                            elementCoordinates: translateMouseCoordinates(50, 50),
-                            context: element.get(0),
-                            isTouchEvent: false
-                        };
-
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                    });
-
-                    it("calls into visual to get identities even when no data", () => {
-                        d3Selection.data([undefined]);
-
-                        element.d3MouseMove(50, 50);
-
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
-
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: undefined,
-                            coordinates: mouseCoordinates,
-                            elementCoordinates: translateMouseCoordinates(50, 50),
-                            context: element.get(0),
-                            isTouchEvent: false
-                        };
-
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                    });
-
-                    it("does not reload tooltip data if reloadTooltipDataOnMouseMove is false", () => {
-                        // reloadTooltipDataOnMouseMove is false by default
-                        element.d3MouseMove(50, 50);
-
-                        expect(getTooltipInfoDelegate).not.toHaveBeenCalled();
-                    });
-
-                    it("reloads tooltip data if reloadTooltipDataOnMouseMove is true", () => {
-                        tooltipService.addTooltip(
-                            d3Selection,
-                            getTooltipInfoDelegate,
-                            getDataPointIdentity,
-                            true /* reloadTooltipDataOnMouseMove */
-                        );
-
-                        element.d3MouseMove(50, 50);
-
-                        let mouseCoordinates = translateMouseCoordinates(50, 50);
-
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: "datum",
-                            coordinates: mouseCoordinates,
-                            elementCoordinates: translateMouseCoordinates(50, 50),
-                            context: element.get(0),
-                            isTouchEvent: false
-                        };
-
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
-
-                        expect(hostVisualTooltip.move).toHaveBeenCalledWith({
-                            coordinates: mouseCoordinates,
-                            isTouchEvent: false,
-                            dataItems: tooltipData,
-                            identities: [],
-                        });
-                    });
+                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
                 });
 
-                describe("mouseout", () => {
-                    it("hides tooltip", () => {
-                        element.d3MouseOut(0, 0);
+                it("calls into visual even when no data", () => {
+                    d3Selection.data([undefined]);
 
-                        expect(hostVisualTooltip.hide).toHaveBeenCalledWith({
-                            isTouchEvent: false,
-                            immediately: false,
-                        });
-                    });
+                    element.d3TouchStart(createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
+
+                    let touchCoordinates = translateTouchCoordinates(50, 50, 0);
+
+                    let expectedTooltipEventArgs: TooltipEventArgs<string> = {
+                        data: undefined,
+                        coordinates: touchCoordinates,
+                        elementCoordinates: translateTouchCoordinates(50, 50, 0),
+                        context: element.get(0),
+                        isTouchEvent: true
+                    };
+
+                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
                 });
+            });
 
-                describe("touchstart", () => {
-                    it("shows tooltip", () => {
-                        element.d3TouchStart(createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
-                        let touchCoordinates = translateTouchCoordinates(50, 50, 0);
-
-                        expect(hostVisualTooltip.show).toHaveBeenCalledWith({
-                            coordinates: touchCoordinates,
-                            isTouchEvent: true,
-                            dataItems: tooltipData,
-                            identities: []
-                        });
-                    });
-
-                    it("calls into visual to get identities and tooltip data", () => {
-                        element.d3TouchStart(createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
-                        let touchCoordinates = translateTouchCoordinates(50, 50, 0);
-
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: "datum",
-                            coordinates: touchCoordinates,
-                            elementCoordinates: translateTouchCoordinates(50, 50, 0),
-                            context: element.get(0),
-                            isTouchEvent: true
-                        };
-
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                    });
-
-                    it("calls into visual even when no data", () => {
-                        d3Selection.data([undefined]);
-
-                        element.d3TouchStart(createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
-                        let touchCoordinates = translateTouchCoordinates(50, 50, 0);
-
-                        let expectedTooltipEventArgs: TooltipEventArgs<string> = {
-                            data: undefined,
-                            coordinates: touchCoordinates,
-                            elementCoordinates: translateTouchCoordinates(50, 50, 0),
-                            context: element.get(0),
-                            isTouchEvent: true
-                        };
-
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(expectedTooltipEventArgs);
-                    });
-                });
-
-                describe("touchend", () => {
-                    it("hides tooltip", () => {
-                        element.d3TouchEnd();
-
-                        expect(hostVisualTooltip.hide).toHaveBeenCalledWith({
-                            isTouchEvent: true,
-                            immediately: false,
-                        });
-                    });
-                });
-
-                it("mouseover does show tooltip after touchend delay", (done) => {
+            describe("touchend", () => {
+                it("hides tooltip", () => {
                     element.d3TouchEnd();
 
-                    setTimeout(() => {
-                        element.d3MouseOver(50, 50);
-
-                        expect(hostVisualTooltip.show).toHaveBeenCalled();
-                        done();
-                    }, /* slightly more than handleTouchDelay */ 20);
+                    expect(hostVisualTooltip.hide).toHaveBeenCalledWith({
+                        isTouchEvent: true,
+                        immediately: false,
+                    });
                 });
             });
 
-            function translateTouchCoordinates(x: number, y: number, id: number): number[] {
-                let coordinates = translateMouseCoordinates(x, y);
+            it("mouseover does show tooltip after touchend delay", (done) => {
+                element.d3TouchEnd();
 
-                // The touch identifier ends up on the coordinates array.
-                (<any>coordinates).identifier = id;
+                setTimeout(() => {
+                    element.d3MouseOver(50, 50);
 
-                return coordinates;
-            }
-
-            function translateMouseCoordinates(x: number, y: number): number[] {
-                return [x, y];
-            }
-        });
-
-        describe("hide", () => {
-            it("calls host tooltip service", () => {
-                tooltipService.hide();
-
-                expect(hostVisualTooltip.hide).toHaveBeenCalled();
+                    expect(hostVisualTooltip.show).toHaveBeenCalled();
+                    done();
+                }, /* slightly more than handleTouchDelay */ 20);
             });
         });
 
-        interface IMockHostTooltipService {
-            show: jasmine.Spy;
-            move: jasmine.Spy;
-            hide: jasmine.Spy;
-            enabled: jasmine.Spy;
+        function translateTouchCoordinates(x: number, y: number, id: number): number[] {
+            let coordinates = translateMouseCoordinates(x, y);
+
+            // The touch identifier ends up on the coordinates array.
+            (<any>coordinates).identifier = id;
+
+            return coordinates;
+        }
+
+        function translateMouseCoordinates(x: number, y: number): number[] {
+            return [x, y];
         }
     });
-}
+
+    describe("hide", () => {
+        it("calls host tooltip service", () => {
+            tooltipService.hide();
+
+            expect(hostVisualTooltip.hide).toHaveBeenCalled();
+        });
+    });
+
+    interface IMockHostTooltipService {
+        show: jasmine.Spy;
+        move: jasmine.Spy;
+        hide: jasmine.Spy;
+        enabled: jasmine.Spy;
+    }
+});
