@@ -25,6 +25,7 @@
  */
 import { Selection } from "d3-selection";
 
+import powerbi from "powerbi-visuals-tools";
 import Selector = powerbi.data.Selector;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 

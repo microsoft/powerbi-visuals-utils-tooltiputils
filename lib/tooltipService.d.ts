@@ -1,6 +1,7 @@
 /// <reference types="powerbi-visuals-tools" />
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./tooltipInterfaces";
 import { Selection } from "d3-selection";
+import powerbi from "powerbi-visuals-tools";
 import ISelectionId = powerbi.visuals.ISelectionId;
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;

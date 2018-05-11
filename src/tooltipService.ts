@@ -28,6 +28,7 @@ import { Selection, event, select, touches, BaseEvent, ContainerElement } from "
 import * as touch from "./tooltipTouch";
 
 // powerbi.visuals
+import powerbi from "powerbi-visuals-tools";
 import ISelectionId = powerbi.visuals.ISelectionId;
 
 // powerbi.extensibility

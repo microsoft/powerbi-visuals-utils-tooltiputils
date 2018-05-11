@@ -1,5 +1,6 @@
 /// <reference types="powerbi-visuals-tools" />
 import { Selection } from "d3-selection";
+import powerbi from "powerbi-visuals-tools";
 export interface TooltipEventArgs<TData> {
     data: TData;
     coordinates: number[];
