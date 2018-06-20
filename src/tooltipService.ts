@@ -62,6 +62,27 @@ module powerbi.extensibility.utils.tooltip {
             this.handleTouchDelay = handleTouchDelay;
         }
 
+
+        /*
+         * Converts values of VisualTooltipDataItem object to string for prevent passing numbers to Tooltip API of Power BI
+         */
+        private convertValuesToString(tooltips: VisualTooltipDataItem[]): VisualTooltipDataItem[] {
+            return tooltips.map( (tooltip: VisualTooltipDataItem) => {
+                tooltip.value = `${tooltip.value}`;
+                tooltip.displayName = `${tooltip.displayName}`;
+                if (tooltip.color) {
+                    tooltip.color = `${tooltip.color}`;
+                }
+                if (tooltip.opacity) {
+                    tooltip.opacity = `${tooltip.opacity}`;
+                }
+                if (tooltip.header) {
+                    tooltip.header = `${tooltip.header}`;
+                }
+                return tooltip;
+            });
+        }
+
         public addTooltip<T>(
             selection: d3.Selection<any>,
             getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => VisualTooltipDataItem[],
@@ -90,6 +111,7 @@ module powerbi.extensibility.utils.tooltip {
                 if (tooltipInfo == null) {
                     return;
                 }
+                tooltipInfo = this.convertValuesToString(tooltipInfo);
 
                 let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
 

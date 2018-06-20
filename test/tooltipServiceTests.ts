@@ -86,6 +86,33 @@ module powerbi.extensibility.utils.tooltip.test {
         });
 
         describe("addTooltip", () => {
+            it("numbers should converted to string", () => {
+                let tooltipData = [{
+                    displayName: "group",
+                    value: 100,
+                }];
+
+                tooltipService.addTooltip(
+                    d3Selection,
+                    (args: TooltipEventArgs<string>) => <any>tooltipData,
+                    () => null
+                );
+
+                let mouseCoordinates = translateMouseCoordinates(50, 50);
+                let expectedTooltipEventArgs = {
+                    dataItems: [{
+                        displayName: "group",
+                        value: "100",
+                    }],
+                    coordinates: mouseCoordinates,
+                    isTouchEvent: false,
+                    identities: []
+                };
+
+                element.d3MouseOver(50, 50);
+                expect(hostVisualTooltip.show).toHaveBeenCalledWith(expectedTooltipEventArgs);
+            });
+
             it("events are added to selection", () => {
                 tooltipService.addTooltip(
                     d3Selection,
