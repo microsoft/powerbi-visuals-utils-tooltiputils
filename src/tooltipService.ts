@@ -24,8 +24,10 @@
 *  THE SOFTWARE.
 */
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./tooltipInterfaces";
-import { Selection, event, select, touches, BaseEvent, ContainerElement } from "d3-selection";
+import { Selection, select, touches, BaseEvent, ContainerElement } from "d3";
 import * as touch from "./tooltipTouch";
+
+const getEvent = () => require("d3").event;
 
 // powerbi.visuals
 import powerbi from "powerbi-visuals-tools";
@@ -34,8 +36,6 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-
 const DefaultHandleTouchDelay = 1000;
 
 export function createTooltipServiceWrapper(
@@ -80,7 +80,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         // Mouse events
         selection.on("mouseover.tooltip", () => {
             // Ignore mouseover while handling touch events
-            if (!this.canDisplayTooltip(event)) {
+            if (!this.canDisplayTooltip(getEvent())) {
                 return;
             }
 
@@ -113,7 +113,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
         selection.on("mousemove.tooltip", () => {
             // Ignore mousemove while handling touch events
-            if (!this.canDisplayTooltip(event)) {
+            if (!this.canDisplayTooltip(getEvent())) {
                 return;
             }
 
@@ -181,7 +181,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
             // At the end of touch action, set a timeout that will let us ignore the incoming mouse events for a small amount of time
             // TODO: any better way to do this?
-            this.handleTouchTimeoutId = setTimeout(() => {
+            this.handleTouchTimeoutId = window.setTimeout(() => {
                 this.handleTouchTimeoutId = undefined;
             }, this.handleTouchDelay);
         });
@@ -209,7 +209,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         isPointerEvent: boolean,
         isTouchEvent: boolean): TooltipEventArgs<T> {
 
-        let target = <HTMLElement>(<Event>event).target,
+        let target = <HTMLElement>(<Event>getEvent()).target,
             data: T = select<any, any>(target).datum();
 
         let mouseCoordinates: number[] = this.getCoordinates(rootNode, isPointerEvent),

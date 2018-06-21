@@ -23,11 +23,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
-import { Selection } from "d3-selection";
-
 import powerbi from "powerbi-visuals-tools";
-import Selector = powerbi.data.Selector;
-import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 
 export interface TooltipEventArgs<TData> {
     data: TData;
@@ -39,7 +35,7 @@ export interface TooltipEventArgs<TData> {
 
 export interface ITooltipServiceWrapper {
     addTooltip<T>(
-        selection: Selection<any, any, any, any>,
+        selection: d3.Selection<any, any, any, any>,
         getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => powerbi.extensibility.VisualTooltipDataItem[],
         getDataPointIdentity?: (args: TooltipEventArgs<T>) => powerbi.visuals.ISelectionId,
         reloadTooltipDataOnMouseMove?: boolean): void;
