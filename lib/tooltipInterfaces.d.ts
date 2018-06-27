@@ -1,5 +1,3 @@
-/// <reference types="powerbi-visuals-tools" />
-import { Selection } from "d3-selection";
 import powerbi from "powerbi-visuals-tools";
 export interface TooltipEventArgs<TData> {
     data: TData;
@@ -9,7 +7,7 @@ export interface TooltipEventArgs<TData> {
     isTouchEvent: boolean;
 }
 export interface ITooltipServiceWrapper {
-    addTooltip<T>(selection: Selection<any, any, any, any>, getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => powerbi.extensibility.VisualTooltipDataItem[], getDataPointIdentity?: (args: TooltipEventArgs<T>) => powerbi.visuals.ISelectionId, reloadTooltipDataOnMouseMove?: boolean): void;
+    addTooltip<T>(selection: d3.Selection<any, any, any, any>, getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => powerbi.extensibility.VisualTooltipDataItem[], getDataPointIdentity?: (args: TooltipEventArgs<T>) => powerbi.visuals.ISelectionId, reloadTooltipDataOnMouseMove?: boolean): void;
     hide(): void;
 }
 export interface TooltipEnabledDataPoint {

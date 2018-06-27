@@ -1,6 +1,5 @@
-/// <reference types="powerbi-visuals-tools" />
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./tooltipInterfaces";
-import { Selection } from "d3-selection";
+import { Selection } from "d3";
 import powerbi from "powerbi-visuals-tools";
 import ISelectionId = powerbi.visuals.ISelectionId;
 import ITooltipService = powerbi.extensibility.ITooltipService;
@@ -13,9 +12,9 @@ export declare class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private handleTouchDelay;
     constructor(tooltipService: ITooltipService, rootElement: Element, handleTouchDelay?: number);
     addTooltip<T>(selection: Selection<any, any, any, any>, getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => VisualTooltipDataItem[], getDataPointIdentity?: (args: TooltipEventArgs<T>) => ISelectionId, reloadTooltipDataOnMouseMove?: boolean): void;
-    private getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
+    private getSelectionIds;
     hide(): void;
-    private makeTooltipEventArgs<T>(rootNode, isPointerEvent, isTouchEvent);
-    private canDisplayTooltip(d3Event);
-    private getCoordinates(rootNode, isPointerEvent);
+    private makeTooltipEventArgs;
+    private canDisplayTooltip;
+    private getCoordinates;
 }
