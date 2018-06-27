@@ -61,7 +61,7 @@ module.exports = (config: Config) => {
             "coverage",
             "karma-remap-istanbul"
         ],
-        singleRun: false,
+        singleRun: true,
         plugins: [
             "karma-remap-istanbul",
             "karma-coverage",
