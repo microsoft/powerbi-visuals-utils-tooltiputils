@@ -30,7 +30,7 @@ import * as touch from "./tooltipTouch";
 const getEvent = () => require("d3").event;
 
 // powerbi.visuals
-import powerbi from "powerbi-visuals-tools";
+import powerbi from "powerbi-visuals-api";
 import ISelectionId = powerbi.visuals.ISelectionId;
 
 // powerbi.extensibility

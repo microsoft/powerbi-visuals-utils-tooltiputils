@@ -36,7 +36,7 @@ import {
 } from "powerbi-visuals-utils-testutils";
 import { select, Selection } from "d3-selection";
 import { TooltipEventArgs } from "./../lib/tooltipInterfaces";
-import powerbi from "powerbi-visuals-tools";
+import powerbi from "powerbi-visuals-api";
 
 // powerbi.visuals
 import ISelectionId = powerbi.visuals.ISelectionId;
