@@ -24,10 +24,10 @@
 *  THE SOFTWARE.
 */
 import { ITooltipServiceWrapper, TooltipEventArgs } from "./tooltipInterfaces";
-import { Selection, select, touches, BaseEvent, ContainerElement } from "d3";
+import { Selection, select, touches, BaseEvent, ContainerElement } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
-const getEvent = () => require("d3").event;
+const getEvent = () => require("d3-selection").event;
 
 // powerbi.visuals
 import powerbi from "powerbi-visuals-api";
