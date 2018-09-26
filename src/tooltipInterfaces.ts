@@ -24,6 +24,7 @@
  *  THE SOFTWARE.
  */
 import powerbi from "powerbi-visuals-api";
+import ITooltipService = powerbi.extensibility.ITooltipService;
 
 export interface TooltipEventArgs<TData> {
     data: TData;
@@ -44,4 +45,12 @@ export interface ITooltipServiceWrapper {
 
 export interface TooltipEnabledDataPoint {
     tooltipInfo?: powerbi.extensibility.VisualTooltipDataItem[];
+}
+
+
+export interface TooltipServiceWrapperOptions {
+    tooltipService: ITooltipService;
+    rootElement: Element;
+    handleTouchDelay: number;
+    getEventMethod?: () => MouseEvent;
 }

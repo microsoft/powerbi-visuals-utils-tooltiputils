@@ -23,7 +23,7 @@
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 *  THE SOFTWARE.
 */
-import { ITooltipServiceWrapper, TooltipEventArgs } from "./tooltipInterfaces";
+import { ITooltipServiceWrapper, TooltipEventArgs, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
 import { Selection, select, touches, BaseEvent, ContainerElement } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
@@ -41,12 +41,15 @@ const DefaultHandleTouchDelay = 1000;
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
     rootElement: Element,
-    handleTouchDelay: number = DefaultHandleTouchDelay): ITooltipServiceWrapper {
+    handleTouchDelay: number = DefaultHandleTouchDelay,
+    getEventMethod: () => MouseEvent = getEvent): ITooltipServiceWrapper {
 
-    return new TooltipServiceWrapper(
-        tooltipService,
-        rootElement,
-        handleTouchDelay);
+    return new TooltipServiceWrapper({
+        tooltipService: tooltipService,
+        rootElement: rootElement,
+        handleTouchDelay: handleTouchDelay,
+        getEventMethod: getEventMethod
+    });
 }
 
 export class TooltipServiceWrapper implements ITooltipServiceWrapper {
@@ -54,15 +57,13 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private visualHostTooltipService: ITooltipService;
     private rootElement: Element;
     private handleTouchDelay: number;
+    private getEvent: () => MouseEvent;
 
-    constructor(
-        tooltipService: ITooltipService,
-        rootElement: Element,
-        handleTouchDelay: number = DefaultHandleTouchDelay) {
-
-        this.visualHostTooltipService = tooltipService;
-        this.rootElement = rootElement;
-        this.handleTouchDelay = handleTouchDelay;
+    constructor(options: TooltipServiceWrapperOptions) {
+        this.visualHostTooltipService = options.tooltipService;
+        this.rootElement = options.rootElement;
+        this.handleTouchDelay = options.handleTouchDelay;
+        this.getEvent = options.getEventMethod || getEvent;
     }
 
     public addTooltip<T>(
@@ -80,7 +81,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         // Mouse events
         selection.on("mouseover.tooltip", () => {
             // Ignore mouseover while handling touch events
-            if (!this.canDisplayTooltip(getEvent())) {
+            if (!this.canDisplayTooltip(this.getEvent())) {
                 return;
             }
 
@@ -113,7 +114,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
         selection.on("mousemove.tooltip", () => {
             // Ignore mousemove while handling touch events
-            if (!this.canDisplayTooltip(getEvent())) {
+            if (!this.canDisplayTooltip(this.getEvent())) {
                 return;
             }
 
@@ -209,7 +210,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         isPointerEvent: boolean,
         isTouchEvent: boolean): TooltipEventArgs<T> {
 
-        let target = <HTMLElement>(<Event>getEvent()).target,
+        let target = <HTMLElement>(<Event>this.getEvent()).target,
             data: T = select<any, any>(target).datum();
 
         let mouseCoordinates: number[] = this.getCoordinates(rootNode, isPointerEvent),

@@ -87,10 +87,11 @@ describe("TooltipService", () => {
         d3Selection = select(element.get(0) as any);
         onSpy = spyOn(d3Selection, "on").and.callThrough();
 
-        tooltipService = new TooltipServiceWrapper(
-            hostVisualTooltip,
-            tooltipRoot.get(0) as any,
-            handleTouchDelay);
+        tooltipService = new TooltipServiceWrapper({
+            tooltipService: hostVisualTooltip,
+            rootElement: tooltipRoot.get(0) as any,
+            handleTouchDelay: handleTouchDelay
+        });
     });
 
     describe("addTooltip", () => {
