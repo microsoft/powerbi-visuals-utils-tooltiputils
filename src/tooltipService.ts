@@ -81,7 +81,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         // Mouse events
         selection.on("mouseover.tooltip", () => {
             // Ignore mouseover while handling touch events
-            if (!this.canDisplayTooltip(this.getEvent())) {
+            if (!this.canDisplayTooltip()) {
                 return;
             }
 
@@ -114,7 +114,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
         selection.on("mousemove.tooltip", () => {
             // Ignore mousemove while handling touch events
-            if (!this.canDisplayTooltip(this.getEvent())) {
+            if (!this.canDisplayTooltip()) {
                 return;
             }
 
@@ -227,9 +227,9 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         return tooltipEventArgs;
     }
 
-    private canDisplayTooltip(d3Event: any): boolean {
-        let canDisplay: boolean = true,
-            mouseEvent: MouseEvent = <MouseEvent>d3Event;
+    private canDisplayTooltip(): boolean {
+        let canDisplay: boolean = true;
+        const mouseEvent: MouseEvent = this.getEvent();
 
         if (mouseEvent.buttons !== undefined) {
             // Check mouse buttons state
