@@ -1,3 +1,6 @@
+## 2.1.3
+* Update packages to fix vulnerabilities
+
 ## 2.0.3
 * Allow to provide custom getEvent method to tooltip service
 
