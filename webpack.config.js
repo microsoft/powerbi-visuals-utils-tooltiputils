@@ -32,9 +32,17 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.(ts)x?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.(ts)x?$/i,
+                enforce: 'post',
+                include: /(src)/,
+                exclude: /(node_modules|resources\/js\/vendor)/,
+                loader: 'istanbul-instrumenter-loader',
+                options: { esModules: true }
             },
             {
                 test: /\.json$/,

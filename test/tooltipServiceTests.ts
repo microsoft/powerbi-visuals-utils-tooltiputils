@@ -35,7 +35,7 @@ import {
     d3TouchStart
 } from "powerbi-visuals-utils-testutils";
 import { select, Selection } from "d3-selection";
-import { TooltipEventArgs } from "./../lib/tooltipInterfaces";
+import { TooltipEventArgs } from "./../src/tooltipInterfaces";
 import powerbi from "powerbi-visuals-api";
 
 // powerbi.visuals
@@ -44,7 +44,7 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 
-import { TooltipServiceWrapper } from "./../lib/tooltipService";
+import { TooltipServiceWrapper } from "./../src/tooltipService";
 
 // powerbi.extensibility.utils.tooltip
 // import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
