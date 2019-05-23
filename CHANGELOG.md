@@ -1,3 +1,8 @@
+## 2.2.0
+* Update packages to fix vulnerabilities
+* Update powerbi-visuals-api to 2.6.0
+* Update powerbi-visuals-utils-testutils to 2.2.0
+
 ## 2.1.3
 * Update packages to fix vulnerabilities
 
