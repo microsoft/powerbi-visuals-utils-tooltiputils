@@ -24,32 +24,30 @@
  *  THE SOFTWARE.
  */
 
-module powerbi.extensibility.utils.tooltip.touch {
-    export function touchStartEventName(): string {
-        let eventName: string = "touchstart";
+export function touchStartEventName(): string {
+    let eventName: string = "touchstart";
 
-        if (window["PointerEvent"]) {
-            // IE11
-            eventName = "pointerdown";
-        }
-
-        return eventName;
+    if (window["PointerEvent"]) {
+        // IE11
+        eventName = "pointerdown";
     }
 
-    export function touchEndEventName(): string {
-        let eventName: string = "touchend";
+    return eventName;
+}
 
-        if (window["PointerEvent"]) {
-            // IE11
-            eventName = "pointerup";
-        }
+export function touchEndEventName(): string {
+    let eventName: string = "touchend";
 
-        return eventName;
+    if (window["PointerEvent"]) {
+        // IE11
+        eventName = "pointerup";
     }
 
-    export function usePointerEvents(): boolean {
-        let eventName: string = touchStartEventName();
+    return eventName;
+}
 
-        return eventName === "pointerdown" || eventName === "MSPointerDown";
-    }
+export function usePointerEvents(): boolean {
+    let eventName: string = touchStartEventName();
+
+    return eventName === "pointerdown" || eventName === "MSPointerDown";
 }
