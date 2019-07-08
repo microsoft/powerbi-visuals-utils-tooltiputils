@@ -1,3 +1,6 @@
+## 2.3.0
+* Tooltiputils doesn't close tooltip on touch end event.
+
 ## 2.2.0
 * Update packages to fix vulnerabilities
 * Update powerbi-visuals-api to 2.6.0

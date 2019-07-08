@@ -367,17 +367,6 @@ describe("TooltipService", () => {
                 });
             });
 
-            describe("touchend", () => {
-                it("hides tooltip", () => {
-                    d3TouchEnd.call(element);
-
-                    expect(hostVisualTooltip.hide).toHaveBeenCalledWith({
-                        isTouchEvent: true,
-                        immediately: false,
-                    });
-                });
-            });
-
             it("mouseover does show tooltip after touchend delay", (done) => {
                 d3TouchEnd.call(element);
 

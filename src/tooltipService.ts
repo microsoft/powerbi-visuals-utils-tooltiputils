@@ -144,9 +144,9 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
         // --- Touch events ---
 
-        let touchStartEventName: string = touch.touchStartEventName(),
-            touchEndEventName: string = touch.touchEndEventName(),
-            isPointerEvent: boolean = touch.usePointerEvents();
+        let touchStartEventName: string = touch.touchStartEventName();
+        let touchEndEventName: string = touch.touchEndEventName();
+        let isPointerEvent: boolean = touch.usePointerEvents();
 
         selection.on(touchStartEventName + ".tooltip", () => {
             this.visualHostTooltipService.hide({
@@ -171,11 +171,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         });
 
         selection.on(touchEndEventName + ".tooltip", () => {
-            this.visualHostTooltipService.hide({
-                isTouchEvent: true,
-                immediately: false,
-            });
-
             if (this.handleTouchTimeoutId) {
                 clearTimeout(this.handleTouchTimeoutId);
             }
