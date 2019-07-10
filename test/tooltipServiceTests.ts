@@ -96,11 +96,11 @@ describe("TooltipService", () => {
 
     describe("addTooltip", () => {
         it("events are added to selection", () => {
-            tooltipService.addTooltip(
-                d3Selection,
-                (args) => [],
-                (args) => undefined
-            );
+            tooltipService.addTooltip({
+                selection: d3Selection,
+                getTooltipInfoDelegate: (args) => [],
+                getDataPointIdentity: (args) => undefined
+            });
 
             expect(onSpy).toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
             expect(onSpy).toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
@@ -113,11 +113,11 @@ describe("TooltipService", () => {
 
         it("events are not added if service is disabled", () => {
             hostVisualTooltip.enabled.and.returnValue(false);
-            tooltipService.addTooltip(
-                d3Selection,
-                (args) => [],
-                (args) => undefined
-            );
+            tooltipService.addTooltip({
+                selection: d3Selection,
+                getTooltipInfoDelegate: (args) => [],
+                getDataPointIdentity: (args) => undefined
+            });
 
             expect(onSpy).not.toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
             expect(onSpy).not.toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
@@ -143,11 +143,11 @@ describe("TooltipService", () => {
                 getTooltipInfoDelegate = jasmine.createSpy("getTooltipInfoDelegate", (args) => tooltipData).and.callThrough();
                 getDataPointIdentity = jasmine.createSpy("getDataPointIdentity", (args) => identity).and.callThrough();
 
-                tooltipService.addTooltip(
-                    d3Selection,
-                    getTooltipInfoDelegate,
-                    getDataPointIdentity
-                );
+                tooltipService.addTooltip({
+                    selection: d3Selection,
+                    getTooltipInfoDelegate: getTooltipInfoDelegate,
+                    getDataPointIdentity: getDataPointIdentity
+                });
 
                 d3Selection.data(["datum"]);
             });
@@ -266,12 +266,12 @@ describe("TooltipService", () => {
                 });
 
                 it("reloads tooltip data if reloadTooltipDataOnMouseMove is true", () => {
-                    tooltipService.addTooltip(
-                        d3Selection,
-                        getTooltipInfoDelegate,
-                        getDataPointIdentity,
-                        true /* reloadTooltipDataOnMouseMove */
-                    );
+                    tooltipService.addTooltip({
+                        selection: d3Selection,
+                        getTooltipInfoDelegate: getTooltipInfoDelegate,
+                        getDataPointIdentity: getDataPointIdentity,
+                        reloadTooltipDataOnMouseMove: true
+                    });
 
                     d3MouseMove(element, 50, 50);
 

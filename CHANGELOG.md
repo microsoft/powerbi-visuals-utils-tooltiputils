@@ -1,3 +1,7 @@
+## 2.4.0
+* Parameters are passed as an object to addTooltip function
+* An ability to disable touch tooltips binding
+
 ## 2.3.0
 * Tooltiputils doesn't close tooltip on touch end event.
 

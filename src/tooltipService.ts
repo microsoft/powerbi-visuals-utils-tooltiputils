@@ -23,7 +23,7 @@
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 *  THE SOFTWARE.
 */
-import { ITooltipServiceWrapper, TooltipEventArgs, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
+import { ITooltipServiceWrapper, TooltipEventArgs, TooltipServiceWrapperOptions, ITooltipOptions } from "./tooltipInterfaces";
 import { Selection, select, touches, BaseEvent, ContainerElement } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
@@ -66,20 +66,16 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         this.getEvent = options.getEventMethod || getEvent;
     }
 
-    public addTooltip<T>(
-        selection: Selection<any, any, any, any>,
-        getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => VisualTooltipDataItem[],
-        getDataPointIdentity?: (args: TooltipEventArgs<T>) => ISelectionId,
-        reloadTooltipDataOnMouseMove?: boolean): void {
+    public addTooltip<T>(options: ITooltipOptions<T>): void {
 
-        if (!selection || !this.visualHostTooltipService.enabled()) {
+        if (!options.selection || !this.visualHostTooltipService.enabled()) {
             return;
         }
 
         let rootNode: Element = this.rootElement;
 
         // Mouse events
-        selection.on("mouseover.tooltip", () => {
+        options.selection.on("mouseover.tooltip", () => {
             // Ignore mouseover while handling touch events
             if (!this.canDisplayTooltip()) {
                 return;
@@ -90,12 +86,12 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 return;
             }
 
-            let tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs);
+            let tooltipInfo = options.getTooltipInfoDelegate(tooltipEventArgs);
             if (tooltipInfo == null) {
                 return;
             }
 
-            let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
+            let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, options.getDataPointIdentity);
 
             this.visualHostTooltipService.show({
                 coordinates: tooltipEventArgs.coordinates,
@@ -105,14 +101,14 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             });
         });
 
-        selection.on("mouseout.tooltip", () => {
+        options.selection.on("mouseout.tooltip", () => {
             this.visualHostTooltipService.hide({
                 isTouchEvent: false,
                 immediately: false,
             });
         });
 
-        selection.on("mousemove.tooltip", () => {
+        options.selection.on("mousemove.tooltip", () => {
             // Ignore mousemove while handling touch events
             if (!this.canDisplayTooltip()) {
                 return;
@@ -124,15 +120,16 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             }
 
             let tooltipInfo: VisualTooltipDataItem[];
-            if (reloadTooltipDataOnMouseMove) {
-                tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs);
+
+            if (options.reloadTooltipDataOnMouseMove) {
+                tooltipInfo = options.getTooltipInfoDelegate(tooltipEventArgs);
 
                 if (tooltipInfo == null) {
                     return;
                 }
             }
 
-            let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
+            let selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, options.getDataPointIdentity);
 
             this.visualHostTooltipService.move({
                 coordinates: tooltipEventArgs.coordinates,
@@ -143,34 +140,35 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         });
 
         // --- Touch events ---
-
         let touchStartEventName: string = touch.touchStartEventName();
         let touchEndEventName: string = touch.touchEndEventName();
         let isPointerEvent: boolean = touch.usePointerEvents();
 
-        selection.on(touchStartEventName + ".tooltip", () => {
-            this.visualHostTooltipService.hide({
-                isTouchEvent: true,
-                immediately: true,
+        if (!options.skipTouchBindind) {
+            options.selection.on(touchStartEventName + ".tooltip", () => {
+                this.visualHostTooltipService.hide({
+                    isTouchEvent: true,
+                    immediately: true,
+                });
+
+                let tooltipEventArgs = this.makeTooltipEventArgs<T>(rootNode, isPointerEvent, true);
+                if (!tooltipEventArgs) {
+                    return;
+                }
+
+                let tooltipInfo = options.getTooltipInfoDelegate(tooltipEventArgs),
+                    selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, options.getDataPointIdentity);
+
+                this.visualHostTooltipService.show({
+                    coordinates: tooltipEventArgs.coordinates,
+                    isTouchEvent: true,
+                    dataItems: tooltipInfo,
+                    identities: selectionIds
+                });
             });
+        }
 
-            let tooltipEventArgs = this.makeTooltipEventArgs<T>(rootNode, isPointerEvent, true);
-            if (!tooltipEventArgs) {
-                return;
-            }
-
-            let tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs),
-                selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
-
-            this.visualHostTooltipService.show({
-                coordinates: tooltipEventArgs.coordinates,
-                isTouchEvent: true,
-                dataItems: tooltipInfo,
-                identities: selectionIds
-            });
-        });
-
-        selection.on(touchEndEventName + ".tooltip", () => {
+        options.selection.on(touchEndEventName + ".tooltip", () => {
             if (this.handleTouchTimeoutId) {
                 clearTimeout(this.handleTouchTimeoutId);
             }
