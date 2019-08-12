@@ -1,3 +1,6 @@
+## 2.3.1
+* Packages update
+
 ## 2.3.0
 * Tooltiputils doesn't close tooltip on touch end event.
 
