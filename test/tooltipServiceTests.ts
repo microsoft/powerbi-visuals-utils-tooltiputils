@@ -73,7 +73,7 @@ describe("TooltipService", () => {
 
         hostVisualTooltip.enabled.and.returnValue(true);
 
-        tooltipRoot = testDom("100px", "100px");
+        tooltipRoot = $(testDom("100px", "100px"));
 
         // avoids having to deal with offset mouse coordinates.
         tooltipRoot.css({
