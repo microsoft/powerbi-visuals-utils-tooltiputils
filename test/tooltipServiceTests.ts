@@ -58,8 +58,8 @@ describe("TooltipService", () => {
         hostVisualTooltip: IMockHostTooltipService,
         onSpy: jasmine.Spy,
         d3Selection: Selection<any, any, any, any>,
-        tooltipRoot: JQuery,
-        element: JQuery;
+        tooltipRoot: HTMLElement,
+        element: HTMLElement;
 
     beforeEach(() => {
         window["PointerEvent"] = null; // Note: We don't want to use PointerEvent in unit test now. We'll add some extra tests for PointerEvent.
@@ -76,20 +76,19 @@ describe("TooltipService", () => {
         tooltipRoot = testDom("100px", "100px");
 
         // avoids having to deal with offset mouse coordinates.
-        tooltipRoot.css({
-            position: "absolute",
-            top: 0,
-            left: 0,
-        });
+        tooltipRoot.style.position = "absolute";
+        tooltipRoot.style.top = "0px";
+        tooltipRoot.style.left = "0px";
 
-        element = $("<div>").appendTo(tooltipRoot);
+        element = document.createElement("div");
+        tooltipRoot.appendChild(element);
 
-        d3Selection = select(element.get(0) as any);
+        d3Selection = select(element);
         onSpy = spyOn(d3Selection, "on").and.callThrough();
 
         tooltipService = new TooltipServiceWrapper({
             tooltipService: hostVisualTooltip,
-            rootElement: tooltipRoot.get(0) as any,
+            rootElement: tooltipRoot,
             handleTouchDelay: handleTouchDelay
         });
     });
@@ -175,7 +174,7 @@ describe("TooltipService", () => {
                         data: "datum",
                         coordinates: mouseCoordinates,
                         elementCoordinates: translateMouseCoordinates(50, 50),
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: false
                     };
 
@@ -194,7 +193,7 @@ describe("TooltipService", () => {
                         data: undefined,
                         coordinates: mouseCoordinates,
                         elementCoordinates: translateMouseCoordinates(50, 50),
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: false
                     };
 
@@ -233,7 +232,7 @@ describe("TooltipService", () => {
                         data: "datum",
                         coordinates: mouseCoordinates,
                         elementCoordinates: translateMouseCoordinates(50, 50),
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: false
                     };
 
@@ -251,7 +250,7 @@ describe("TooltipService", () => {
                         data: undefined,
                         coordinates: mouseCoordinates,
                         elementCoordinates: translateMouseCoordinates(50, 50),
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: false
                     };
 
@@ -281,7 +280,7 @@ describe("TooltipService", () => {
                         data: "datum",
                         coordinates: mouseCoordinates,
                         elementCoordinates: translateMouseCoordinates(50, 50),
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: false
                     };
 
@@ -335,7 +334,7 @@ describe("TooltipService", () => {
                         data: "datum",
                         coordinates: touchCoordinates,
                         elementCoordinates: elementCoordinates,
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: true
                     };
 
@@ -358,7 +357,7 @@ describe("TooltipService", () => {
                         data: undefined,
                         coordinates: touchCoordinates,
                         elementCoordinates: elementCoordinates,
-                        context: element.get(0) as any,
+                        context: element,
                         isTouchEvent: true
                     };
 
