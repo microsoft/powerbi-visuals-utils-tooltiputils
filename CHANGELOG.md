@@ -1,3 +1,7 @@
+## 2.4.0
+* Packages update
+* No-jquery tests
+
 ## 2.3.1
 * Packages update
 * No-jquery tests
