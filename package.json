@@ -52,7 +52,7 @@
     "karma-typescript-preprocessor": "0.4.0",
     "karma-webpack": "4.0.2",
     "powerbi-visuals-api": "3.2.0",
-    "powerbi-visuals-utils-testutils": "2.3.1",
+    "powerbi-visuals-utils-testutils": "2.3.3",
     "puppeteer": "4.0.1",
     "ts-loader": "7.0.5",
     "ts-node": "8.10.2",
@@ -62,6 +62,6 @@
     "webpack": "4.43.0"
   },
   "dependencies": {
-    "d3-selection": "^1.4.1"
+    "d3-selection": "^2.0.0"
   }
 }
