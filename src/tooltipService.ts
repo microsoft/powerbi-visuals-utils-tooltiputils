@@ -24,10 +24,9 @@
 *  THE SOFTWARE.
 */
 import { ITooltipServiceWrapper, TooltipEventArgs, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
-import { Selection, select, touches, BaseEvent, ContainerElement } from "d3-selection";
+import { Selection, select, pointers } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
-//const getEvent = () => require("d3-selection").event;
 
 // powerbi.visuals
 import powerbi from "powerbi-visuals-api";
@@ -41,14 +40,12 @@ const DefaultHandleTouchDelay = 1000;
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
     rootElement: Element,
-    handleTouchDelay: number = DefaultHandleTouchDelay,
-    /*!!!!!!!!!!!!!!!!!!getEventMethod: () => MouseEvent = getEvent*/): ITooltipServiceWrapper {
+    handleTouchDelay: number = DefaultHandleTouchDelay): ITooltipServiceWrapper {
 
     return new TooltipServiceWrapper({
         tooltipService: tooltipService,
         rootElement: rootElement,
         handleTouchDelay: handleTouchDelay,
-        //getEventMethod: getEventMethod
     });
 }
 
@@ -57,13 +54,11 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private visualHostTooltipService: ITooltipService;
     private rootElement: Element;
     private handleTouchDelay: number;
-    //private getEvent: () => MouseEvent;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
         this.rootElement = options.rootElement;
         this.handleTouchDelay = options.handleTouchDelay;
-        //!!!!!!!!!!!!!!!!this.getEvent = options.getEventMethod || getEvent;
     }
 
     public addTooltip<T>(
@@ -89,7 +84,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             if (!tooltipEventArgs) {
                 return;
             }
-
             let tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs);
             if (tooltipInfo == null) {
                 return;
@@ -158,7 +152,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             if (!tooltipEventArgs) {
                 return;
             }
-
             let tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs),
                 selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
 
@@ -209,8 +202,8 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         let target = <HTMLElement>event.target,
             data: T = select<any, any>(target).datum();
 
-        let mouseCoordinates: number[] = this.getCoordinates(rootNode, isPointerEvent),
-            elementCoordinates: number[] = this.getCoordinates(target, isPointerEvent);
+        let mouseCoordinates: number[] = this.getCoordinates(event, rootNode, isPointerEvent),
+            elementCoordinates: number[] = this.getCoordinates(event, target, isPointerEvent);
 
         let tooltipEventArgs: TooltipEventArgs<T> = {
             data: data,
@@ -239,7 +232,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         return canDisplay;
     }
 
-    private getCoordinates(rootNode: Element, isPointerEvent: boolean): number[] {
+    private getCoordinates(event, rootNode: Element, isPointerEvent: boolean): number[] {
         let coordinates: number[];
 
         if (isPointerEvent) {
@@ -251,7 +244,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             // copied from d3_eventSource (which is not exposed)
             let e = <MouseEvent>event, s;
 
-            while (s = (<BaseEvent>e).sourceEvent) e = s;
+            while (s = (<any>e).sourceEvent) e = s;
 
             let rect: ClientRect = rootNode.getBoundingClientRect();
 
@@ -261,7 +254,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             ];
         }
         else {
-            let touchCoordinates = touches(rootNode as ContainerElement);
+            let touchCoordinates = pointers(event/*rootNode as ContainerElement*/);
 
             if (touchCoordinates && touchCoordinates.length > 0) {
                 coordinates = touchCoordinates[0];

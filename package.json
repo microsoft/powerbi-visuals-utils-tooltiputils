@@ -30,7 +30,7 @@
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\"  \"+(src|test)/**/*.ts\""
   },
   "devDependencies": {
-    "@types/d3": "5.7.2",
+    "@types/d3": "^5.7.2",
     "@types/jasmine": "3.5.11",
     "@types/jquery": "3.5.0",
     "@types/karma": "5.0.0",
