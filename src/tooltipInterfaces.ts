@@ -40,7 +40,8 @@ export interface ITooltipServiceWrapper {
         getTooltipInfoDelegate: (args: TooltipEventArgs<T>) => powerbi.extensibility.VisualTooltipDataItem[],
         getDataPointIdentity?: (args: TooltipEventArgs<T>) => powerbi.visuals.ISelectionId,
         reloadTooltipDataOnMouseMove?: boolean): void;
-    hide(): void;
+        hide(): void;
+        cancelTouchTimeoutEvents(): void;
 }
 
 export interface TooltipEnabledDataPoint {
@@ -51,6 +52,5 @@ export interface TooltipEnabledDataPoint {
 export interface TooltipServiceWrapperOptions {
     tooltipService: ITooltipService;
     rootElement: Element;
-    handleTouchDelay: number;
-    getEventMethod?: () => MouseEvent;
+    handleTouchDelay?: number;
 }

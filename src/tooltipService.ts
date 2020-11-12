@@ -35,7 +35,7 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-const DefaultHandleTouchDelay = 1000;
+const DefaultHandleTouchDelay = 500;
 
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
@@ -143,11 +143,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         let isPointerEvent: boolean = touch.usePointerEvents();
 
         selection.on(touchStartEventName + ".tooltip", (event) => {
-            this.visualHostTooltipService.hide({
-                isTouchEvent: true,
-                immediately: true,
-            });
-
             let tooltipEventArgs = this.makeTooltipEventArgs<T>(event, rootNode, isPointerEvent, true);
             if (!tooltipEventArgs) {
                 return;
@@ -155,18 +150,28 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             let tooltipInfo = getTooltipInfoDelegate(tooltipEventArgs),
                 selectionIds: ISelectionId[] = this.getSelectionIds<T>(tooltipEventArgs, getDataPointIdentity);
 
-            this.visualHostTooltipService.show({
-                coordinates: tooltipEventArgs.coordinates,
-                isTouchEvent: true,
-                dataItems: tooltipInfo,
-                identities: selectionIds
-            });
+            this.handleTouchTimeoutId = window.setTimeout(() => {
+                this.visualHostTooltipService.hide({ 
+                    isTouchEvent: true, 
+                    immediately: true 
+                });
+
+                this.visualHostTooltipService.show({
+                    coordinates: tooltipEventArgs.coordinates,
+                    isTouchEvent: true,
+                    dataItems: tooltipInfo,
+                    identities: selectionIds
+                });
+                this.handleTouchTimeoutId = undefined;
+            }, this.handleTouchDelay)
+        });
+
+        selection.on('contextmenu', () => {
+            this.cancelTouchTimeoutEvents();
         });
 
         selection.on(touchEndEventName + ".tooltip", (event) => {
-            if (this.handleTouchTimeoutId) {
-                clearTimeout(this.handleTouchTimeoutId);
-            }
+            this.cancelTouchTimeoutEvents();
 
             // At the end of touch action, set a timeout that will let us ignore the incoming mouse events for a small amount of time
             // TODO: any better way to do this?
@@ -174,6 +179,12 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 this.handleTouchTimeoutId = undefined;
             }, this.handleTouchDelay);
         });
+    }
+
+    public cancelTouchTimeoutEvents() {
+        if (this.handleTouchTimeoutId) {
+            clearTimeout(this.handleTouchTimeoutId);
+        }
     }
 
     private getSelectionIds<T>(

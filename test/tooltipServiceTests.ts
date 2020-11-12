@@ -310,15 +310,17 @@ describe("TooltipService", () => {
                 it("shows tooltip", () => {
                     d3TouchStart.call(element, element, createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
 
-                    let touchCoordinates = translateTouchCoordinates(50, 50, 0);
-                    delete (<any>touchCoordinates).identifier;
+                    setTimeout(() => {
+                        let touchCoordinates = translateTouchCoordinates(50, 50, 0);
+                        delete (<any>touchCoordinates).identifier;
 
-                    expect(hostVisualTooltip.show).toHaveBeenCalledWith({
-                        coordinates: touchCoordinates,
-                        isTouchEvent: true,
-                        dataItems: tooltipData,
-                        identities: []
-                    });
+                        expect(hostVisualTooltip.show).toHaveBeenCalledWith({
+                            coordinates: touchCoordinates,
+                            isTouchEvent: true,
+                            dataItems: tooltipData,
+                            identities: []
+                        });
+                    }, 500);
                 });
 
                 it("calls into visual to get identities and tooltip data", () => {
