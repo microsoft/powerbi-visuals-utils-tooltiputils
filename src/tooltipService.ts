@@ -35,6 +35,7 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 const DefaultHandleTouchDelay = 500;
 
 export function createTooltipServiceWrapper(
@@ -54,6 +55,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private visualHostTooltipService: ITooltipService;
     private rootElement: Element;
     private handleTouchDelay: number;
+    private selectionManager: ISelectionManager;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
@@ -80,7 +82,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 return;
             }
 
-            let coordinates = this.getCoordinates(event, rootNode, true)
+            let coordinates = this.getCoordinates(event, rootNode, true);
 
             let tooltipInfo = getTooltipInfoDelegate(data);
             if (tooltipInfo == null) {
@@ -138,8 +140,8 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         let isPointerEvent: boolean = touch.usePointerEvents();
 
         selection.on(touchStartEventName + ".tooltip", (event, data) => {
-            let coordinates = this.getCoordinates(event, rootNode, true)
-            let tooltipInfo = getTooltipInfoDelegate(data)
+            let coordinates = this.getCoordinates(event, rootNode, true);
+            let tooltipInfo = getTooltipInfoDelegate(data);
             let selectionId: ISelectionId = getDataPointIdentity(data);
 
             this.handleTouchTimeoutId = window.setTimeout(() => {
@@ -150,11 +152,19 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                     identities: [selectionId]
                 });
                 this.handleTouchTimeoutId = undefined;
-            }, this.handleTouchDelay)
+            }, this.handleTouchDelay);
         });
 
-        selection.on('contextmenu', () => {
-            this.cancelTouchTimeoutEvents();
+        selection.on("contextmenu", (e) => {
+            const mouseEvent: MouseEvent = e;
+            const eventTarget: EventTarget = mouseEvent.target;
+
+            let dataPoint: any = select(<d3.BaseType>eventTarget).datum();
+            this.selectionManager.showContextMenu(dataPoint ? dataPoint.identity : {}, {
+                x: mouseEvent.clientX,
+                y: mouseEvent.clientY
+            });
+            mouseEvent.preventDefault();
         });
 
         selection.on(touchEndEventName + ".tooltip", (event) => {

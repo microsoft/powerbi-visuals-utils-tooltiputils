@@ -1,3 +1,7 @@
+## 2.4.1
+* D3 update
+* Handle contextMenu on mobile devices
+
 ## 2.4.0
 * Packages update
 * No-jquery tests
