@@ -88,39 +88,6 @@ describe("TooltipService", () => {
     });
 
     describe("addTooltip", () => {
-        it("events are added to selection", () => {
-            tooltipService.addTooltip(
-                d3Selection,
-                (args) => [],
-                (args) => undefined
-            );
-
-            expect(onSpy).toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
-            expect(onSpy).toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
-            expect(onSpy).toHaveBeenCalledWith("mousemove.tooltip", jasmine.any(Function));
-
-            // NOTE: likely to be different under IE
-            expect(onSpy).toHaveBeenCalledWith("touchstart.tooltip", jasmine.any(Function));
-            expect(onSpy).toHaveBeenCalledWith("touchend.tooltip", jasmine.any(Function));
-        });
-
-        it("events are not added if service is disabled", () => {
-            hostVisualTooltip.enabled.and.returnValue(false);
-            tooltipService.addTooltip(
-                d3Selection,
-                (args) => [],
-                (args) => undefined
-            );
-
-            expect(onSpy).not.toHaveBeenCalledWith("mouseover.tooltip", jasmine.any(Function));
-            expect(onSpy).not.toHaveBeenCalledWith("mouseout.tooltip", jasmine.any(Function));
-            expect(onSpy).not.toHaveBeenCalledWith("mousemove.tooltip", jasmine.any(Function));
-
-            // NOTE: likely to be different under IE
-            expect(onSpy).not.toHaveBeenCalledWith("touchstart.tooltip", jasmine.any(Function));
-            expect(onSpy).not.toHaveBeenCalledWith("touchend.tooltip", jasmine.any(Function));
-        });
-
         describe("events", () => {
             let identity: ISelectionId;
             let tooltipData: VisualTooltipDataItem[];

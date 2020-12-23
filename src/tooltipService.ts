@@ -23,8 +23,8 @@
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 *  THE SOFTWARE.
 */
-import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
-import { Selection, selectAll, pointers } from "d3-selection";
+import { ITooltipServiceWrapper, TooltipEventArgs, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
+import { Selection, select, selectAll, pointers } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
 
@@ -35,6 +35,7 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 const DefaultHandleTouchDelay = 500;
 
 export function createTooltipServiceWrapper(
@@ -54,6 +55,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private visualHostTooltipService: ITooltipService;
     private rootElement: Element;
     private handleTouchDelay: number;
+    private selectionManager: ISelectionManager;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
@@ -74,7 +76,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         let rootNode: Element = this.rootElement;
 
         let internalSelection = selectAll(selection.nodes());
-        
         // Mouse events
         internalSelection.on("mouseover.tooltip", (event: Event, data: T) => {
             // Ignore mouseover while handling touch events
@@ -154,6 +155,10 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 });
                 this.handleTouchTimeoutId = undefined;
             }, this.handleTouchDelay);
+        });
+
+        internalSelection.on("contextmenu", (event, data: T) => {
+            this.cancelTouchTimeoutEvents();
         });
 
         internalSelection.on(touchEndEventName + ".tooltip", () => {
