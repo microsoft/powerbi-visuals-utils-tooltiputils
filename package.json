@@ -1,6 +1,6 @@
 {
   "name": "powerbi-visuals-utils-tooltiputils",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "TooltipUtils",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -30,7 +30,7 @@
     "lint": "tslint -r \"node_modules/tslint-microsoft-contrib\"  \"+(src|test)/**/*.ts\""
   },
   "devDependencies": {
-    "@types/d3": "5.7.2",
+    "@types/d3": "^5.7.2",
     "@types/jasmine": "3.5.11",
     "@types/jquery": "3.5.0",
     "@types/karma": "5.0.0",
@@ -51,8 +51,8 @@
     "karma-typescript": "5.0.3",
     "karma-typescript-preprocessor": "0.4.0",
     "karma-webpack": "4.0.2",
-    "powerbi-visuals-api": "3.2.0",
-    "powerbi-visuals-utils-testutils": "2.3.1",
+    "powerbi-visuals-api": "3.4.0",
+    "powerbi-visuals-utils-testutils": "2.3.3",
     "puppeteer": "4.0.1",
     "ts-loader": "7.0.5",
     "ts-node": "8.10.2",
@@ -62,6 +62,6 @@
     "webpack": "4.43.0"
   },
   "dependencies": {
-    "d3-selection": "^1.4.1"
+    "d3-selection": "^2.0.0"
   }
 }
