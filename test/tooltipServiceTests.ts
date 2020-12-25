@@ -142,13 +142,6 @@ describe("TooltipService", () => {
                     expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
                     expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
                 });
-
-                it("does not show tooltip immediately after touchend", () => {
-                    d3TouchEnd.call(element);
-                    d3MouseOver(element, 50, 50);
-
-                    expect(hostVisualTooltip.show).not.toHaveBeenCalled();
-                });
             });
 
             describe("mousemove", () => {

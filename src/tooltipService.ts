@@ -23,8 +23,8 @@
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 *  THE SOFTWARE.
 */
-import { ITooltipServiceWrapper, TooltipEventArgs, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
-import { Selection, select, selectAll, pointers } from "d3-selection";
+import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
+import { Selection, selectAll, pointers } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
 
@@ -35,7 +35,6 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-import ISelectionManager = powerbi.extensibility.ISelectionManager;
 const DefaultHandleTouchDelay = 500;
 
 export function createTooltipServiceWrapper(
@@ -55,7 +54,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private visualHostTooltipService: ITooltipService;
     private rootElement: Element;
     private handleTouchDelay: number;
-    private selectionManager: ISelectionManager;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
@@ -79,7 +77,6 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         // Mouse events
         internalSelection.on("mouseover.tooltip", (event: Event, data: T) => {
             // Ignore mouseover while handling touch events
-
             if (!this.canDisplayTooltip(event)) {
                 return;
             }
@@ -157,18 +154,8 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             }, this.handleTouchDelay);
         });
 
-        internalSelection.on("contextmenu", (event, data: T) => {
-            this.cancelTouchTimeoutEvents();
-        });
-
         internalSelection.on(touchEndEventName + ".tooltip", () => {
             this.cancelTouchTimeoutEvents();
-
-            // At the end of touch action, set a timeout that will let us ignore the incoming mouse events for a small amount of time
-            // TODO: any better way to do this?
-            this.handleTouchTimeoutId = window.setTimeout(() => {
-                this.handleTouchTimeoutId = undefined;
-            }, this.handleTouchDelay);
         });
     }
 

@@ -1,5 +1,5 @@
-## 2.4.1
-* D3 update
+## 2.5.0
+* D3 update / adaptive for v5(or less) and v6 d3 in visuals
 * Handle contextMenu on mobile devices
 
 ## 2.4.0
