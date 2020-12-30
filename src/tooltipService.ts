@@ -63,8 +63,8 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
     public addTooltip<T>(
         selection: Selection<any, any, any, any>,
-        getTooltipInfoDelegate: (args: T) => VisualTooltipDataItem[],
-        getDataPointIdentity?: (args: T) => ISelectionId,
+        getTooltipInfoDelegate: (datapoint: T) => VisualTooltipDataItem[],
+        getDataPointIdentity: (datapoint: T) => ISelectionId,
         reloadTooltipDataOnMouseMove?: boolean): void {
 
         if (!selection || !this.visualHostTooltipService.enabled()) {
