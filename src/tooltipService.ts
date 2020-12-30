@@ -88,13 +88,13 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 return;
             }
 
-            let selectionId: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 
             this.visualHostTooltipService.show({
                 coordinates: coordinates,
                 isTouchEvent: false,
                 dataItems: tooltipInfo,
-                identities: selectionId
+                identities: selectionIds
             });
         });
 
@@ -122,13 +122,13 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 }
             }
 
-            let selectionId: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 
             this.visualHostTooltipService.move({
                 coordinates: coordinates,
                 isTouchEvent: false,
                 dataItems: tooltipInfo,
-                identities: selectionId
+                identities: selectionIds
             });
         });
 
@@ -141,14 +141,14 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         internalSelection.on(touchStartEventName + ".tooltip", (event, data: T) => {
             let coordinates = this.getCoordinates(event, rootNode, true);
             let tooltipInfo = getTooltipInfoDelegate(data);
-            let selectionId: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 
             this.handleTouchTimeoutId = window.setTimeout(() => {
                 this.visualHostTooltipService.show({
                     coordinates: coordinates,
                     isTouchEvent: true,
                     dataItems: tooltipInfo,
-                    identities: selectionId
+                    identities: selectionIds
                 });
                 this.handleTouchTimeoutId = undefined;
             }, this.handleTouchDelay);
