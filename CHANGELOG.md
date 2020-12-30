@@ -1,3 +1,6 @@
+## 2.5.1
+* Made addToolips 3-rd arg as required; 
+
 ## 2.5.0
 * D3 update / adaptive for v5(or less) and v6 d3 in visuals
 * Handle contextMenu on mobile devices

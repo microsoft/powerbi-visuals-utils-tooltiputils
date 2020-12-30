@@ -37,8 +37,8 @@ export interface TooltipEventArgs<TData> {
 export interface ITooltipServiceWrapper {
     addTooltip<T>(
         selection: d3.Selection<any, any, any, any>,
-        getTooltipInfoDelegate: (args: T) => powerbi.extensibility.VisualTooltipDataItem[],
-        getDataPointIdentity?: (args: T) => powerbi.extensibility.ISelectionId,
+        getTooltipInfoDelegate: (datapoint: T) => powerbi.extensibility.VisualTooltipDataItem[],
+        getDataPointIdentity: (datapoint: T) => powerbi.extensibility.ISelectionId,
         reloadTooltipDataOnMouseMove?: boolean): void;
     hide(): void;
     cancelTouchTimeoutEvents(): void;
