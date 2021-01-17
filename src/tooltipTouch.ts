@@ -27,21 +27,11 @@
 export function touchStartEventName(): string {
     let eventName: string = "touchstart";
 
-    if (window["PointerEvent"]) {
-        // IE11
-        eventName = "pointerdown";
-    }
-
     return eventName;
 }
 
 export function touchEndEventName(): string {
     let eventName: string = "touchend";
-
-    if (window["PointerEvent"]) {
-        // IE11
-        eventName = "pointerup";
-    }
 
     return eventName;
 }
