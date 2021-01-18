@@ -1,6 +1,6 @@
 {
   "name": "powerbi-visuals-utils-tooltiputils",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "TooltipUtils",
   "main": "lib/index.js",
   "module": "lib/index.js",
