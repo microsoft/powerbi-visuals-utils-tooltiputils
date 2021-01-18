@@ -1,5 +1,5 @@
 ## 2.5.2
-* addToolips fix; 
+* Fixed touchstart/touchend events for iOS devices; 
 ## 2.5.1
 * addToolips fix; 
 
