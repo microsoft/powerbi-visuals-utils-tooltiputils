@@ -139,7 +139,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         let isPointerEvent: boolean = touch.usePointerEvents();
 
         internalSelection.on(touchStartEventName + ".tooltip", (event, data: T) => {
-            let coordinates = this.getCoordinates(event, rootNode, true);
+            let coordinates = this.getCoordinates(event, rootNode, false);
             let tooltipInfo = getTooltipInfoDelegate(data);
             let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 

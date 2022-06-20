@@ -1,3 +1,6 @@
+## 2.5.3
+* Fixed mobile tooltipe coordinates calculation; 
+
 ## 2.5.2
 * Fixed touchstart/touchend events for iOS devices; 
 ## 2.5.1
