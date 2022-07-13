@@ -214,11 +214,11 @@ describe("TooltipService", () => {
                     });
                 });
             });
-
+           
             describe("touchstart", () => {
-                it("shows tooltip", () => {
+                it("shows tooltip with correct coordinates and data", (done) => {
                     d3TouchStart.call(element, element, createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
+                   
                     setTimeout(() => {
                         let touchCoordinates = translateTouchCoordinates(50, 50, 0);
                         delete (<any>touchCoordinates).identifier;
@@ -227,8 +227,9 @@ describe("TooltipService", () => {
                             coordinates: touchCoordinates,
                             isTouchEvent: true,
                             dataItems: tooltipData,
-                            identities: []
+                            identities: [undefined]
                         });
+                        done();
                     }, 500);
                 });
 
