@@ -27,7 +27,6 @@ import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipI
 import { Selection, selectAll, pointers } from "d3-selection";
 import * as touch from "./tooltipTouch";
 
-
 // powerbi.visuals
 import powerbi from "powerbi-visuals-api";
 import ISelectionId = powerbi.visuals.ISelectionId;
@@ -39,12 +38,12 @@ const DefaultHandleTouchDelay = 500;
 
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
-    rootElement: Element,
-    handleTouchDelay: number = DefaultHandleTouchDelay): ITooltipServiceWrapper {
+    rootElement?: Element, // this argument is deprecated and is optional now to maintain visuals with tooltiputils logic for versions bellow 3.0.0 without any changes
+    handleTouchDelay: number = DefaultHandleTouchDelay
+): ITooltipServiceWrapper {
 
     return new TooltipServiceWrapper({
         tooltipService: tooltipService,
-        rootElement: rootElement,
         handleTouchDelay: handleTouchDelay,
     });
 }
@@ -52,12 +51,10 @@ export function createTooltipServiceWrapper(
 export class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private handleTouchTimeoutId: number;
     private visualHostTooltipService: ITooltipService;
-    private rootElement: Element;
     private handleTouchDelay: number;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
-        this.rootElement = options.rootElement;
         this.handleTouchDelay = options.handleTouchDelay;
     }
 
@@ -71,91 +68,60 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             return;
         }
 
-        let rootNode: Element = this.rootElement;
-
         let internalSelection = selectAll(selection.nodes());
-        // Mouse events
-        internalSelection.on("mouseover.tooltip", (event: Event, data: T) => {
-            // Ignore mouseover while handling touch events
-            if (!this.canDisplayTooltip(event)) {
-                return;
-            }
 
-            let coordinates = this.getCoordinates(event, rootNode, true);
+        let callTooltip = (func: Function, event: PointerEvent, tooltipInfo: VisualTooltipDataItem[], selectionIds: ISelectionId[]): void => {
+            let coordinates = [event.clientX, event.clientY];
+            func.call(this.visualHostTooltipService, {
+                coordinates: coordinates,
+                isTouchEvent: event.pointerType === "touch",
+                dataItems: tooltipInfo,
+                identities: selectionIds
+            });
+        };
 
+        internalSelection.on("pointerover", (event: PointerEvent, data: T) => {
             let tooltipInfo = getTooltipInfoDelegate(data);
             if (tooltipInfo == null) {
                 return;
             }
-
             let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 
-            this.visualHostTooltipService.show({
-                coordinates: coordinates,
-                isTouchEvent: false,
-                dataItems: tooltipInfo,
-                identities: selectionIds
-            });
-        });
-
-        internalSelection.on("mouseout.tooltip", (event: Event, data: T) => {
-            this.visualHostTooltipService.hide({
-                isTouchEvent: false,
-                immediately: false,
-            });
-        });
-
-        internalSelection.on("mousemove.tooltip", (event: Event, data: T) => {
-            // Ignore mousemove while handling touch events
-            if (!this.canDisplayTooltip(event)) {
-                return;
+            if (event.pointerType === "mouse") {
+                callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
             }
-
-            let coordinates = this.getCoordinates(event, rootNode, true);
-
-            let tooltipInfo: VisualTooltipDataItem[];
-            if (reloadTooltipDataOnMouseMove) {
-                tooltipInfo = getTooltipInfoDelegate(data);
-
-                if (tooltipInfo == null) {
-                    return;
-                }
+            if (event.pointerType === "touch") {
+                this.handleTouchTimeoutId = window.setTimeout(() => {
+                    callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
+                    this.handleTouchTimeoutId = undefined;
+                }, this.handleTouchDelay);
             }
-
-            let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
-
-            this.visualHostTooltipService.move({
-                coordinates: coordinates,
-                isTouchEvent: false,
-                dataItems: tooltipInfo,
-                identities: selectionIds
-            });
         });
 
-        // --- Touch events ---
-
-        let touchStartEventName: string = touch.touchStartEventName();
-        let touchEndEventName: string = touch.touchEndEventName();
-        let isPointerEvent: boolean = touch.usePointerEvents();
-
-        internalSelection.on(touchStartEventName + ".tooltip", (event, data: T) => {
-            let coordinates = this.getCoordinates(event, rootNode, false);
-            let tooltipInfo = getTooltipInfoDelegate(data);
-            let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
-
-            this.handleTouchTimeoutId = window.setTimeout(() => {
-                this.visualHostTooltipService.show({
-                    coordinates: coordinates,
-                    isTouchEvent: true,
-                    dataItems: tooltipInfo,
-                    identities: selectionIds
+        internalSelection.on("pointerout", (event: PointerEvent, data: T) => {
+            if (event.pointerType === "mouse") {
+                this.visualHostTooltipService.hide({
+                    isTouchEvent: false,
+                    immediately: false,
                 });
-                this.handleTouchTimeoutId = undefined;
-            }, this.handleTouchDelay);
+            }
+            if (event.pointerType === "touch") {
+                this.cancelTouchTimeoutEvents();
+            }
         });
 
-        internalSelection.on(touchEndEventName + ".tooltip", () => {
-            this.cancelTouchTimeoutEvents();
+        internalSelection.on("pointermove", (event: PointerEvent, data: T) => {
+            if (event.pointerType === "mouse") {
+                let tooltipInfo: VisualTooltipDataItem[];
+                if (reloadTooltipDataOnMouseMove) {
+                    tooltipInfo = getTooltipInfoDelegate(data);
+                    if (tooltipInfo == null) {
+                        return;
+                    }
+                }
+                let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+                callTooltip(this.visualHostTooltipService.move, event, tooltipInfo, selectionIds);
+            }
         });
     }
 
@@ -169,51 +135,4 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         this.visualHostTooltipService.hide({ immediately: true, isTouchEvent: false });
     }
 
-    private canDisplayTooltip(event): boolean {
-        let canDisplay: boolean = true;
-        const mouseEvent: MouseEvent = event;
-
-        if (mouseEvent.buttons !== undefined) {
-            // Check mouse buttons state
-            let hasMouseButtonPressed = mouseEvent.buttons !== 0;
-            canDisplay = !hasMouseButtonPressed;
-        }
-
-        // Make sure we are not ignoring mouse events immediately after touch end.
-        canDisplay = canDisplay && (this.handleTouchTimeoutId == null);
-
-        return canDisplay;
-    }
-
-    private getCoordinates(event, rootNode: Element, isPointerEvent: boolean): number[] {
-        let coordinates: number[];
-
-        if (isPointerEvent) {
-            // DO NOT USE - WebKit bug in getScreenCTM with nested SVG results in slight negative coordinate shift
-            // Also, IE will incorporate transform scale but WebKit does not, forcing us to detect browser and adjust appropriately.
-            // Just use non-scaled coordinates for all browsers, and adjust for the transform scale later (see lineChart.findIndex)
-            // coordinates = d3.mouse(rootNode);
-
-            // copied from d3_eventSource (which is not exposed)
-            let e = <MouseEvent>event, s;
-
-            while (s = (<any>e).sourceEvent) e = s;
-
-            let rect: ClientRect = rootNode.getBoundingClientRect();
-
-            coordinates = [
-                e.clientX - rect.left - rootNode.clientLeft,
-                e.clientY - rect.top - rootNode.clientTop
-            ];
-        }
-        else {
-            let touchCoordinates = pointers(event);
-
-            if (touchCoordinates && touchCoordinates.length > 0) {
-                coordinates = touchCoordinates[0];
-            }
-        }
-
-        return coordinates;
-    }
 }

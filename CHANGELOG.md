@@ -1,5 +1,11 @@
-## 2.5.3
+## 3.0.0
+* Moved to pointer events
+* Fixed web and mobile tooltip defenition logic; 
+* Fixed mobile tooltip "glitch" issue (fast 'opening - closing - opening' of tooltip on mobile devices);
 * Fixed mobile tooltipe coordinates calculation; 
+
+### **⚠ IMPORTANT CHANGES**
+* `rootElement` argument in `createTooltipServiceWrapper` has been deprecated, it is now optional and can be removed completely in the future;
 
 ## 2.5.2
 * Fixed touchstart/touchend events for iOS devices; 

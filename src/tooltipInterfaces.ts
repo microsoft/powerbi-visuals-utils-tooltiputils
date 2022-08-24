@@ -51,6 +51,6 @@ export interface TooltipEnabledDataPoint {
 
 export interface TooltipServiceWrapperOptions {
     tooltipService: ITooltipService;
-    rootElement: Element;
+    rootElement?: Element;
     handleTouchDelay?: number;
 }
