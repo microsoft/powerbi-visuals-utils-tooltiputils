@@ -26,13 +26,9 @@
 
 import {
     testDom,
-    createTouchesList,
-    createTouch,
-    d3MouseOver,
-    d3TouchEnd,
-    d3MouseMove,
-    d3MouseOut,
-    d3TouchStart
+    PointerEventType,
+    PointerType,
+    pointerEvent
 } from "powerbi-visuals-utils-testutils";
 import { select, Selection } from "d3-selection";
 import powerbi from "powerbi-visuals-api";
@@ -45,6 +41,8 @@ import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 
 import { TooltipServiceWrapper } from "./../src/tooltipService";
 
+import { DefaultHandleTouchDelay } from "../constants"
+
 describe("TooltipService", () => {
     const handleTouchDelay: number = 10;
 
@@ -56,7 +54,7 @@ describe("TooltipService", () => {
         element: HTMLElement;
 
     beforeEach(() => {
-        window["PointerEvent"] = null; // Note: We don't want to use PointerEvent in unit test now. We'll add some extra tests for PointerEvent.
+        // window["PointerEvent"] = null; // Note: We don't want to use PointerEvent in unit test now. We'll add some extra tests for PointerEvent.
 
         hostVisualTooltip = jasmine.createSpyObj("tooltipService", [
             "show",
@@ -93,6 +91,8 @@ describe("TooltipService", () => {
             let tooltipData: VisualTooltipDataItem[];
             let getTooltipInfoDelegate: jasmine.Spy;
             let getDataPointIdentity: jasmine.Spy;
+            let coordinateX: number = 50;
+            let coordinateY: number = 50;
 
             beforeEach(() => {
                 tooltipData = [{
@@ -112,47 +112,80 @@ describe("TooltipService", () => {
                 d3Selection.data(["datum"]);
             });
 
-            describe("mouseover", () => {
-                it("shows tooltip", () => {
-                    d3MouseOver.call(element, element, 50, 50);
+            describe("pointerover: ", () => {
+                describe("for mouse type device, ", () => {
+                    it("shows tooltip", () => {
+                        pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
 
-                    let mouseCoordinates = translateMouseCoordinates(50, 50);
-                    let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
+                        let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
 
-                    expect(hostVisualTooltip.show).toHaveBeenCalledWith({
-                        coordinates: mouseCoordinates,
-                        isTouchEvent: false,
-                        dataItems: tooltipData,
-                        identities: [selectionId]
+                        expect(hostVisualTooltip.show).toHaveBeenCalledWith({
+                            coordinates: [coordinateX, coordinateY],
+                            isTouchEvent: false,
+                            dataItems: tooltipData,
+                            identities: [selectionId]
+                        });
                     });
-                });
 
-                it("calls into visual to get identities and tooltip data", () => {
-                    d3MouseOver.call(element, element, 50, 50);
+                    it("calls into visual to get identities and tooltip data", () => {
+                        pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
 
-                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
-                });
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                    });
 
-                it("calls into visual even when no data", () => {
-                    d3Selection.data([undefined]);
+                    it("calls into visual even when no data", () => {
+                        d3Selection.data([undefined]);
 
-                    d3MouseOver.call(element, element, 50, 50);
+                        pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
 
-                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                    });
+                })
+                describe("for touch type device", () => {
+                    it("shows tooltip", (done) => {
+                        pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, coordinateX, coordinateY);
+
+                        let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
+
+                        setTimeout(() => {
+                            expect(hostVisualTooltip.show).toHaveBeenCalledWith({
+                                coordinates: [coordinateX, coordinateY],
+                                isTouchEvent: true,
+                                dataItems: tooltipData,
+                                identities: [selectionId]
+                            });
+                            done();
+                        }, DefaultHandleTouchDelay);
+                    });
+
+                    it("calls into visual to get identities and tooltip data", () => {
+                        pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, coordinateX, coordinateY);
+
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                    });
+
+                    it("calls into visual even when no data", () => {
+                        d3Selection.data([undefined]);
+
+                        pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, coordinateX, coordinateY);
+
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                    });
                 });
             });
 
-            describe("mousemove", () => {
+            describe("pointermove", () => {
                 it("moves tooltip", () => {
-                    d3MouseMove(element, 50, 50);
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
-                    let mouseCoordinates = translateMouseCoordinates(50, 50);
                     let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
 
                     expect(hostVisualTooltip.move).toHaveBeenCalledWith({
-                        coordinates: mouseCoordinates,
+                        coordinates: [coordinateX, coordinateY],
                         isTouchEvent: false,
                         dataItems: undefined,
                         identities: [selectionId]
@@ -160,7 +193,7 @@ describe("TooltipService", () => {
                 });
 
                 it("calls into visual to get identities", () => {
-                    d3MouseMove(element, 50, 50);
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
                 });
@@ -168,14 +201,14 @@ describe("TooltipService", () => {
                 it("calls into visual to get identities even when no data", () => {
                     d3Selection.data([undefined]);
 
-                    d3MouseMove(element, 50, 50);
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
                 });
 
                 it("does not reload tooltip data if reloadTooltipDataOnMouseMove is false", () => {
                     // reloadTooltipDataOnMouseMove is false by default
-                    d3MouseMove(element, 50, 50);
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(getTooltipInfoDelegate).not.toHaveBeenCalled();
                 });
@@ -188,15 +221,13 @@ describe("TooltipService", () => {
                         true /* reloadTooltipDataOnMouseMove */
                     );
 
-                    d3MouseMove(element, 50, 50);
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
-                    let mouseCoordinates = translateMouseCoordinates(50, 50);
                     let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
 
                     expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-
                     expect(hostVisualTooltip.move).toHaveBeenCalledWith({
-                        coordinates: mouseCoordinates,
+                        coordinates: [coordinateX, coordinateY],
                         isTouchEvent: false,
                         dataItems: tooltipData,
                         identities: [selectionId]
@@ -204,9 +235,9 @@ describe("TooltipService", () => {
                 });
             });
 
-            describe("mouseout", () => {
+            describe("pointerout", () => {
                 it("hides tooltip", () => {
-                    d3MouseOut(element, 0, 0);
+                    pointerEvent.call(element, element, PointerEventType.pointerout, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(hostVisualTooltip.hide).toHaveBeenCalledWith({
                         isTouchEvent: false,
@@ -215,52 +246,12 @@ describe("TooltipService", () => {
                 });
             });
 
-            describe("touchstart", () => {
-                it("shows tooltip with correct coordinates and data", (done) => {
-                    d3TouchStart.call(element, element, createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
-                    setTimeout(() => {
-                        let touchCoordinates = translateTouchCoordinates(50, 50, 0);
-                        delete (<any>touchCoordinates).identifier;
-
-                        expect(hostVisualTooltip.show).toHaveBeenCalledWith({
-                            coordinates: touchCoordinates,
-                            isTouchEvent: true,
-                            dataItems: tooltipData,
-                            identities: [undefined]
-                        });
-                        done();
-                    }, 500);
-                });
-
-                it("calls into visual to get identities and tooltip data", () => {
-                    d3TouchStart.call(element, element, createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
-                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
-                });
-
-                it("calls into visual even when no data", () => {
-                    d3Selection.data([undefined]);
-
-                    d3TouchStart.call(element, element, createTouchesList([createTouch(50, 50, element, /* id */ 0)]));
-
-                    let touchCoordinates = translateTouchCoordinates(50, 50, 0);
-                    delete (<any>touchCoordinates).identifier;
-
-                    let elementCoordinates = translateTouchCoordinates(50, 50, 0);
-                    delete (<any>elementCoordinates).identifier;
-
-                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
-                });
-            });
 
             it("mouseover does show tooltip after touchend delay", (done) => {
-                d3TouchEnd.call(element);
+                pointerEvent.call(element, element, PointerEventType.pointerout, PointerType.mouse, coordinateX, coordinateY);
 
                 setTimeout(() => {
-                    d3MouseOver(element, 50, 50);
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(hostVisualTooltip.show).toHaveBeenCalled();
                     done();
@@ -268,18 +259,6 @@ describe("TooltipService", () => {
             });
         });
 
-        function translateTouchCoordinates(x: number, y: number, id: number): number[] {
-            let coordinates = translateMouseCoordinates(x, y);
-
-            // The touch identifier ends up on the coordinates array.
-            (<any>coordinates).identifier = id;
-
-            return coordinates;
-        }
-
-        function translateMouseCoordinates(x: number, y: number): number[] {
-            return [x, y];
-        }
     });
 
     describe("hide", () => {

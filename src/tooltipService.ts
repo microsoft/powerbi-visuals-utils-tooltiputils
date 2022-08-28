@@ -24,8 +24,8 @@
 *  THE SOFTWARE.
 */
 import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
-import { Selection, selectAll, pointers } from "d3-selection";
-import * as touch from "./tooltipTouch";
+import { Selection, selectAll } from "d3-selection";
+import { DefaultHandleTouchDelay } from "../constants"
 
 // powerbi.visuals
 import powerbi from "powerbi-visuals-api";
@@ -34,7 +34,6 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
-const DefaultHandleTouchDelay = 500;
 
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
