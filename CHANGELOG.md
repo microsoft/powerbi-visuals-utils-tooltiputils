@@ -1,9 +1,9 @@
 ## 3.0.0
-* Moved to pointer events instead of mouse and touch events; 
+* Now we use pointer events instead of mouse and touch events; 
 * Fixed web and mobile tooltip defenition logic; 
 * Fixed mobile tooltip "glitch" issue (fast 'opening - closing - opening' of tooltip on mobile devices);
 * Fixed mobile tooltipe coordinates calculation; 
-* Moved to ESlint; 
+* Migrated to ESlint; 
 * Fixed vulnerabilities and updated libs;
 * Removed unused libs; 
 
