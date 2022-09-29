@@ -1,8 +1,11 @@
 ## 3.0.0
-* Moved to pointer events
+* Moved to pointer events instead of mouse and touch events; 
 * Fixed web and mobile tooltip defenition logic; 
 * Fixed mobile tooltip "glitch" issue (fast 'opening - closing - opening' of tooltip on mobile devices);
 * Fixed mobile tooltipe coordinates calculation; 
+* Moved to ESlint; 
+* Fixed vulnerabilities and updated libs;
+* Removed unused libs; 
 
 ### **⚠ IMPORTANT CHANGES**
 * `rootElement` argument in `createTooltipServiceWrapper` has been deprecated, it is now optional and can be removed completely in the future;

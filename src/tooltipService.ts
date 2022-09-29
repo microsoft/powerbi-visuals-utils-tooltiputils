@@ -34,10 +34,12 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 // powerbi.extensibility
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+import TooltipMoveOptions = powerbi.extensibility.TooltipMoveOptions;
+import TooltipShowOptions = powerbi.extensibility.TooltipShowOptions;
 
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
-    rootElement?: Element, // this argument is deprecated and is optional now to maintain visuals with tooltiputils logic for versions bellow 3.0.0 without any changes
+    rootElement?: Element, // this argument is deprecated and is optional now, just to maintain visuals with tooltiputils logic written for versions bellow 3.0.0
     handleTouchDelay: number = DefaultHandleTouchDelay
 ): ITooltipServiceWrapper {
 
@@ -67,10 +69,10 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             return;
         }
 
-        let internalSelection = selectAll(selection.nodes());
+        const internalSelection = selectAll(selection.nodes());
 
-        let callTooltip = (func: Function, event: PointerEvent, tooltipInfo: VisualTooltipDataItem[], selectionIds: ISelectionId[]): void => {
-            let coordinates = [event.clientX, event.clientY];
+        const callTooltip = (func: (options: TooltipMoveOptions | TooltipShowOptions) => void, event: PointerEvent, tooltipInfo: VisualTooltipDataItem[], selectionIds: ISelectionId[]): void => {
+            const coordinates = [event.clientX, event.clientY];
             func.call(this.visualHostTooltipService, {
                 coordinates: coordinates,
                 isTouchEvent: event.pointerType === "touch",
@@ -80,11 +82,11 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         };
 
         internalSelection.on("pointerover", (event: PointerEvent, data: T) => {
-            let tooltipInfo = getTooltipInfoDelegate(data);
+            const tooltipInfo = getTooltipInfoDelegate(data);
             if (tooltipInfo == null) {
                 return;
             }
-            let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 
             if (event.pointerType === "mouse") {
                 callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
@@ -97,7 +99,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             }
         });
 
-        internalSelection.on("pointerout", (event: PointerEvent, data: T) => {
+        internalSelection.on("pointerout", (event: PointerEvent) => {
             if (event.pointerType === "mouse") {
                 this.visualHostTooltipService.hide({
                     isTouchEvent: false,
@@ -118,7 +120,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
                         return;
                     }
                 }
-                let selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+                const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
                 callTooltip(this.visualHostTooltipService.move, event, tooltipInfo, selectionIds);
             }
         });
