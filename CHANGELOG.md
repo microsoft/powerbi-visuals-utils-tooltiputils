@@ -4,7 +4,7 @@
 * Fixed mobile tooltip "glitch" issue (fast 'opening - closing - opening' of tooltip on mobile devices);
 * Fixed mobile tooltipe coordinates calculation; 
 * Migrated to ESlint; 
-* Migrated to `coverage-istanbul-loader` from `istanbul-instrumenter-loader`
+* Replaced `istanbul-instrumenter-loader` by `coverage-istanbul-loader`;
 * Fixed vulnerabilities and updated libs;
 * Removed unused libs; 
 
