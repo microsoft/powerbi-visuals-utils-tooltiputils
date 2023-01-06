@@ -1,3 +1,16 @@
+## 3.0.0
+* Now we use pointer events instead of mouse and touch events; 
+* Fixed web and mobile tooltip defenition logic; 
+* Fixed mobile tooltip "glitch" issue (fast 'opening - closing - opening' of tooltip on mobile devices);
+* Fixed mobile tooltipe coordinates calculation; 
+* Migrated to ESlint; 
+* Replaced `istanbul-instrumenter-loader` by `coverage-istanbul-loader`;
+* Fixed vulnerabilities and updated libs;
+* Removed unused libs; 
+
+### **⚠ IMPORTANT CHANGES**
+* `rootElement` argument in `createTooltipServiceWrapper` has been deprecated, it is now optional and can be removed completely in the future;
+
 ## 2.5.2
 * Fixed touchstart/touchend events for iOS devices; 
 ## 2.5.1
