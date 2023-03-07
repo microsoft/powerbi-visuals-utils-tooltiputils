@@ -1,3 +1,7 @@
+## 6.0.0
+* Packages update
+* Vulnerabilities patched
+
 ## 3.0.0
 * Now we use pointer events instead of mouse and touch events; 
 * Fixed web and mobile tooltip defenition logic; 
