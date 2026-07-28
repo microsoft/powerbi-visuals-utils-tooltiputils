@@ -37,7 +37,14 @@ const coverageFolder = "coverage";
 process.env.CHROME_BIN = require("playwright-chromium").chromium.executablePath();
 module.exports = (config) => {
     config.set({
-        browsers: ["ChromeHeadless"],
+        // CI runners provide no usable Chrome sandbox, so run headless with --no-sandbox there.
+        browsers: [process.env.CI ? "ChromeHeadlessNoSandbox" : "ChromeHeadless"],
+        customLaunchers: {
+            ChromeHeadlessNoSandbox: {
+                base: "ChromeHeadless",
+                flags: ["--no-sandbox", "--disable-gpu"]
+            }
+        },
         colors: true,
         frameworks: ["jasmine"],
         reporters: [
