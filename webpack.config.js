@@ -33,7 +33,17 @@ module.exports = {
         rules: [
             {
                 test: /\.(ts)x?$/,
-                use: 'ts-loader',
+                // Test bundle: don't emit .d.ts to outDir (lib/). Declarations for the
+                // published package are produced by `npm run build` (tsc), not by webpack.
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        compilerOptions: {
+                            declaration: false,
+                            declarationMap: false
+                        }
+                    }
+                },
                 exclude: /node_modules/
             },
             {

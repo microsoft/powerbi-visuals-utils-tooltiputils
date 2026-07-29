@@ -179,6 +179,8 @@ describe("TooltipService", () => {
 
             describe("pointermove", () => {
                 it("moves tooltip", () => {
+                    // A tooltip can only be moved after it was shown (pointerover).
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
@@ -192,6 +194,7 @@ describe("TooltipService", () => {
                 });
 
                 it("calls into visual to get identities", () => {
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
@@ -200,13 +203,45 @@ describe("TooltipService", () => {
                 it("calls into visual to get identities even when no data", () => {
                     d3Selection.data([undefined]);
 
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
                 });
 
+                it("does not move tooltip without a preceding pointerover (show)", () => {
+                    // Regression: a "move" must not be emitted if no "show" happened.
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
+
+                    expect(hostVisualTooltip.move).not.toHaveBeenCalled();
+                });
+
+                it("does not show or move tooltip when tooltip data is null (tooltips disabled)", () => {
+                    // Regression for stale-tooltip bug: when the visual returns no
+                    // tooltip data, neither "show" nor "move" must reach the host.
+                    getTooltipInfoDelegate.and.returnValue(null);
+
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
+
+                    expect(hostVisualTooltip.show).not.toHaveBeenCalled();
+                    expect(hostVisualTooltip.move).not.toHaveBeenCalled();
+                });
+
+                it("stops moving tooltip after pointerout (hide)", () => {
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
+                    pointerEvent.call(element, element, PointerEventType.pointerout, PointerType.mouse, coordinateX, coordinateY);
+
+                    pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
+
+                    expect(hostVisualTooltip.move).not.toHaveBeenCalled();
+                });
+
                 it("does not reload tooltip data if reloadTooltipDataOnMouseMove is false", () => {
                     // reloadTooltipDataOnMouseMove is false by default
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
+                    getTooltipInfoDelegate.calls.reset();
+
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     expect(getTooltipInfoDelegate).not.toHaveBeenCalled();
@@ -219,6 +254,9 @@ describe("TooltipService", () => {
                         getDataPointIdentity,
                         true /* reloadTooltipDataOnMouseMove */
                     );
+
+                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
+                    getTooltipInfoDelegate.calls.reset();
 
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 

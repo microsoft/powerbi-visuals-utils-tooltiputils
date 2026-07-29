@@ -71,6 +71,13 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
         const internalSelection = selectAll(selection.nodes());
 
+        // Tracks whether a tooltip is currently shown for this subscription.
+        // A "move" event must only be emitted between a "show" and a "hide",
+        // otherwise the host may reposition/re-show a stale tooltip that this
+        // visual never actually displayed (e.g. when tooltips are disabled and
+        // getTooltipInfoDelegate returns null).
+        let isTooltipShown = false;
+
         const callTooltip = (func: (options: TooltipMoveOptions | TooltipShowOptions) => void, event: PointerEvent, tooltipInfo: VisualTooltipDataItem[], selectionIds: ISelectionId[]): void => {
             const coordinates = [event.clientX, event.clientY];
             func.call(this.visualHostTooltipService, {
@@ -89,10 +96,12 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
 
             if (event.pointerType === "mouse") {
+                isTooltipShown = true;
                 callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
             }
             if (event.pointerType === "touch") {
                 this.handleTouchTimeoutId = window.setTimeout(() => {
+                    isTooltipShown = true;
                     callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
                     this.handleTouchTimeoutId = undefined;
                 }, this.handleTouchDelay);
@@ -100,6 +109,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         });
 
         internalSelection.on("pointerout", (event: PointerEvent) => {
+            isTooltipShown = false;
             if (event.pointerType === "mouse") {
                 this.visualHostTooltipService.hide({
                     isTouchEvent: false,
@@ -112,17 +122,22 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         });
 
         internalSelection.on("pointermove", (event: PointerEvent, data: T) => {
-            if (event.pointerType === "mouse") {
-                let tooltipInfo: VisualTooltipDataItem[];
-                if (reloadTooltipDataOnMouseMove) {
-                    tooltipInfo = getTooltipInfoDelegate(data);
-                    if (tooltipInfo == null) {
-                        return;
-                    }
-                }
-                const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
-                callTooltip(this.visualHostTooltipService.move, event, tooltipInfo, selectionIds);
+            if (event.pointerType !== "mouse") {
+                return;
             }
+            // Do not move a tooltip that was never shown (no preceding "show").
+            if (!isTooltipShown) {
+                return;
+            }
+            let tooltipInfo: VisualTooltipDataItem[];
+            if (reloadTooltipDataOnMouseMove) {
+                tooltipInfo = getTooltipInfoDelegate(data);
+                if (tooltipInfo == null) {
+                    return;
+                }
+            }
+            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            callTooltip(this.visualHostTooltipService.move, event, tooltipInfo, selectionIds);
         });
     }
 

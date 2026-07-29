@@ -1,3 +1,6 @@
+## 6.0.5
+* Fixed stale tooltip issue: a "move" event is no longer emitted to the host unless a tooltip was previously shown (between "show" and "hide")
+
 ## 6.0.4
 * powerbi-visuals-api update to 5.9.0
 
