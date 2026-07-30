@@ -24,7 +24,7 @@
 *  THE SOFTWARE.
 */
 
-import { vi } from "vitest";
+import { vi, type Mock } from "vitest";
 import {
     testDom,
     PointerEventType,
@@ -92,8 +92,8 @@ describe("TooltipService", () => {
         describe("events", () => {
             let identity: ISelectionId = undefined as any;
             let tooltipData: VisualTooltipDataItem[];
-            let getTooltipInfoDelegate: (args: any) => VisualTooltipDataItem[];
-            let getDataPointIdentity: (args: any) => ISelectionId;
+            let getTooltipInfoDelegate: Mock<(args: any) => VisualTooltipDataItem[]>;
+            let getDataPointIdentity: Mock<(args: any) => ISelectionId>;
             let coordinateX: number = 50;
             let coordinateY: number = 50;
 
@@ -222,7 +222,7 @@ describe("TooltipService", () => {
                 it("does not show or move tooltip when tooltip data is null (tooltips disabled)", () => {
                     // Regression for stale-tooltip bug: when the visual returns no
                     // tooltip data, neither "show" nor "move" must reach the host.
-                    getTooltipInfoDelegate.and.returnValue(null);
+                    getTooltipInfoDelegate.mockReturnValue(null as unknown as VisualTooltipDataItem[]);
 
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
@@ -243,7 +243,7 @@ describe("TooltipService", () => {
                 it("does not reload tooltip data if reloadTooltipDataOnMouseMove is false", () => {
                     // reloadTooltipDataOnMouseMove is false by default
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
-                    getTooltipInfoDelegate.calls.reset();
+                    getTooltipInfoDelegate.mockClear();
 
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
@@ -259,7 +259,7 @@ describe("TooltipService", () => {
                     );
 
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
-                    getTooltipInfoDelegate.calls.reset();
+                    getTooltipInfoDelegate.mockClear();
 
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
