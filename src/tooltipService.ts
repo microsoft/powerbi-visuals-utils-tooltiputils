@@ -25,7 +25,7 @@
 */
 import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
 import { Selection, selectAll } from "d3-selection";
-import { DefaultHandleTouchDelay } from "../constants"
+import { DefaultHandleTouchDelay } from "./constants";
 
 // powerbi.visuals
 import powerbi from "powerbi-visuals-api";
@@ -35,7 +35,6 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import TooltipMoveOptions = powerbi.extensibility.TooltipMoveOptions;
-import TooltipShowOptions = powerbi.extensibility.TooltipShowOptions;
 
 export function createTooltipServiceWrapper(
     tooltipService: ITooltipService,
@@ -50,13 +49,13 @@ export function createTooltipServiceWrapper(
 }
 
 export class TooltipServiceWrapper implements ITooltipServiceWrapper {
-    private handleTouchTimeoutId: number;
+    private handleTouchTimeoutId: number | undefined;
     private visualHostTooltipService: ITooltipService;
     private handleTouchDelay: number;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
-        this.handleTouchDelay = options.handleTouchDelay;
+        this.handleTouchDelay = options.handleTouchDelay ?? DefaultHandleTouchDelay;
     }
 
     public addTooltip<T>(
@@ -88,12 +87,12 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             });
         };
 
-        internalSelection.on("pointerover", (event: PointerEvent, data: T) => {
-            const tooltipInfo = getTooltipInfoDelegate(data);
+        internalSelection.on("pointerover", (event: PointerEvent, data: unknown) => {
+            const tooltipInfo = getTooltipInfoDelegate(data as T);
             if (tooltipInfo == null) {
                 return;
             }
-            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data as T)] : [];
 
             if (event.pointerType === "mouse") {
                 isTooltipShown = true;

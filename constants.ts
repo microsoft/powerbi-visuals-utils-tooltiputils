@@ -1,1 +1,0 @@
-export const DefaultHandleTouchDelay: number = 500;
