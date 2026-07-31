@@ -39,16 +39,17 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 
 // powerbi.extensibility
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+import ITooltipService = powerbi.extensibility.ITooltipService;
 
 import { TooltipServiceWrapper } from "../src/tooltipService";
 
 import { DefaultHandleTouchDelay } from "../src/constants";
 
-interface IMockHostTooltipService {
-    show: ReturnType<typeof vi.fn>;
-    move: ReturnType<typeof vi.fn>;
-    hide: ReturnType<typeof vi.fn>;
-    enabled: ReturnType<typeof vi.fn>;
+interface IMockHostTooltipService extends ITooltipService {
+    show: Mock<ITooltipService["show"]>;
+    move: Mock<ITooltipService["move"]>;
+    hide: Mock<ITooltipService["hide"]>;
+    enabled: Mock<ITooltipService["enabled"]>;
 }
 
 describe("TooltipService", () => {
@@ -63,10 +64,10 @@ describe("TooltipService", () => {
     beforeEach(() => {
 
         hostVisualTooltip = {
-            show: vi.fn(),
-            move: vi.fn(),
-            hide: vi.fn(),
-            enabled: vi.fn().mockReturnValue(true)
+            show: vi.fn<ITooltipService["show"]>(),
+            move: vi.fn<ITooltipService["move"]>(),
+            hide: vi.fn<ITooltipService["hide"]>(),
+            enabled: vi.fn<ITooltipService["enabled"]>().mockReturnValue(true)
         };
 
         tooltipRoot = testDom("100px", "100px");
@@ -82,7 +83,7 @@ describe("TooltipService", () => {
         d3Selection = select(element);
 
         tooltipService = new TooltipServiceWrapper({
-            tooltipService: hostVisualTooltip as any,
+            tooltipService: hostVisualTooltip,
             rootElement: tooltipRoot,
             handleTouchDelay: handleTouchDelay
         });
@@ -90,7 +91,14 @@ describe("TooltipService", () => {
 
     describe("addTooltip", () => {
         describe("events", () => {
-            let identity: ISelectionId = undefined as any;
+            const identity: ISelectionId = {
+                equals: () => true,
+                includes: () => true,
+                getKey: () => "mock-selection-id",
+                getSelector: () => ({}),
+                getSelectorsByColumn: () => ({}),
+                hasIdentity: () => true
+            };
             let tooltipData: VisualTooltipDataItem[];
             let getTooltipInfoDelegate: Mock<(args: any) => VisualTooltipDataItem[]>;
             let getDataPointIdentity: Mock<(args: any) => ISelectionId>;
@@ -152,7 +160,7 @@ describe("TooltipService", () => {
 
                         let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
 
-                        await new Promise(resolve => setTimeout(resolve, DefaultHandleTouchDelay));
+                        await new Promise(resolve => setTimeout(resolve, /* slightly more than handleTouchDelay */ 20));
 
                         expect(hostVisualTooltip.show).toHaveBeenCalledWith({
                             coordinates: [coordinateX, coordinateY],
@@ -298,6 +306,40 @@ describe("TooltipService", () => {
             });
         });
 
+    });
+
+    describe("handleTouchDelay", () => {
+        const showTouchTooltip = (wrapper: TooltipServiceWrapper): void => {
+            wrapper.addTooltip(d3Selection, () => [{ displayName: "group", value: "100" }]);
+            d3Selection.data(["datum"]);
+
+            pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, 50, 50);
+        };
+
+        const wait = (delay: number): Promise<void> =>
+            new Promise(resolve => setTimeout(resolve, delay));
+
+        it("falls back to DefaultHandleTouchDelay when it is not specified", async () => {
+            showTouchTooltip(new TooltipServiceWrapper({
+                tooltipService: hostVisualTooltip
+            }));
+
+            await wait(DefaultHandleTouchDelay / 2);
+            expect(hostVisualTooltip.show).not.toHaveBeenCalled();
+
+            await wait(DefaultHandleTouchDelay);
+            expect(hostVisualTooltip.show).toHaveBeenCalled();
+        });
+
+        it("keeps an explicitly passed zero delay", async () => {
+            showTouchTooltip(new TooltipServiceWrapper({
+                tooltipService: hostVisualTooltip,
+                handleTouchDelay: 0
+            }));
+
+            await wait(0);
+            expect(hostVisualTooltip.show).toHaveBeenCalled();
+        });
     });
 
     describe("hide", () => {

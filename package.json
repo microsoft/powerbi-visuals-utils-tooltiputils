@@ -26,6 +26,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
+    "prebuild": "node -e \"require('fs').rmSync('lib', { recursive: true, force: true })\"",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",

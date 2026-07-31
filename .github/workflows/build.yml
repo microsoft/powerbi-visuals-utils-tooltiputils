@@ -25,7 +25,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm audit
+    # Scoped to shipped dependencies so a devDependency advisory cannot red-build unrelated PRs.
+    - run: npm audit --audit-level=high --omit=dev
     - run: npm run lint
     - run: npm run test:typecheck
     - run: npx playwright install --with-deps chromium

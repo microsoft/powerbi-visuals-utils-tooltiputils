@@ -10,6 +10,7 @@ export default [
             "coverage/**",
             "test/**",
             "lib/**",
+            ".tmp/**",
             "eslint.config.mjs"
         ]
     },
