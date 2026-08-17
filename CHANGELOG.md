@@ -1,3 +1,30 @@
+## 7.0.0
+
+### Breaking changes
+* Test runner migrated from Karma + Jasmine to Vitest (browser mode with Playwright headless Chromium).
+* Build/development TypeScript upgraded to 6.x.
+* Module output paths changed: `lib/index.js` (was `lib/src/index.js`).
+* Emitted JavaScript language level raised: `target` and `module` moved from ES2015 to ES2020 (`moduleResolution` is now `bundler`). `lib/*.js` now ships modern syntax such as `??` and object spread, which raises the minimum requirement on the consumer's bundler/toolchain.
+* `TooltipServiceWrapper` now falls back to `DefaultHandleTouchDelay` (500 ms) when `handleTouchDelay` is omitted. Previously the field stayed `undefined` and the touch tooltip was shown immediately. Pass `handleTouchDelay: 0` to keep the previous behaviour; an explicit `0` is preserved. `createTooltipServiceWrapper` is unaffected, it already defaulted to 500 ms.
+
+### Changed
+* `powerbi-visuals-api` updated to ^5.11.0.
+* `d3-selection` types updated.
+* Source code fixed for TypeScript strict mode.
+* `constants.ts` moved into `src/` for proper module structure.
+* CI/development baseline updated to Node.js 20.x / 22.x.
+
+### Removed
+* Karma, Webpack, Jasmine, ts-loader, coverage-istanbul-loader removed.
+* `karma.conf.ts` and `webpack.config.js` deleted.
+* Custom `codeql-analysis.yml` workflow deleted in favour of GitHub's default CodeQL setup.
+
+### Infrastructure
+* Lint stack migrated to ESLint 10 flat config (`eslint.config.mjs`).
+* CI workflows modernized to `actions/*@v6` and Node 20/22 matrix.
+* Release workflow updated to use `GITHUB_TOKEN` and Playwright install step.
+* Added Dependabot configuration for monthly npm and GitHub Actions updates.
+
 ## 6.0.5
 * Fixed stale tooltip issue: a "move" event is no longer emitted to the host unless a tooltip was previously shown (between "show" and "hide")
 

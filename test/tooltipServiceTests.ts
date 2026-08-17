@@ -24,6 +24,7 @@
 *  THE SOFTWARE.
 */
 
+import { vi, type Mock } from "vitest";
 import {
     testDom,
     PointerEventType,
@@ -38,31 +39,36 @@ import ISelectionId = powerbi.visuals.ISelectionId;
 
 // powerbi.extensibility
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
+import ITooltipService = powerbi.extensibility.ITooltipService;
 
-import { TooltipServiceWrapper } from "./../src/tooltipService";
+import { TooltipServiceWrapper } from "../src/tooltipService";
 
-import { DefaultHandleTouchDelay } from "../constants"
+import { DefaultHandleTouchDelay } from "../src/constants";
+
+interface IMockHostTooltipService extends ITooltipService {
+    show: Mock<ITooltipService["show"]>;
+    move: Mock<ITooltipService["move"]>;
+    hide: Mock<ITooltipService["hide"]>;
+    enabled: Mock<ITooltipService["enabled"]>;
+}
 
 describe("TooltipService", () => {
     const handleTouchDelay: number = 10;
 
     let tooltipService: TooltipServiceWrapper,
         hostVisualTooltip: IMockHostTooltipService,
-        onSpy: jasmine.Spy,
         d3Selection: Selection<any, any, any, any>,
         tooltipRoot: HTMLElement,
         element: HTMLElement;
 
     beforeEach(() => {
 
-        hostVisualTooltip = jasmine.createSpyObj("tooltipService", [
-            "show",
-            "move",
-            "hide",
-            "enabled"
-        ]);
-
-        hostVisualTooltip.enabled.and.returnValue(true);
+        hostVisualTooltip = {
+            show: vi.fn<ITooltipService["show"]>(),
+            move: vi.fn<ITooltipService["move"]>(),
+            hide: vi.fn<ITooltipService["hide"]>(),
+            enabled: vi.fn<ITooltipService["enabled"]>().mockReturnValue(true)
+        };
 
         tooltipRoot = testDom("100px", "100px");
 
@@ -75,7 +81,6 @@ describe("TooltipService", () => {
         tooltipRoot.appendChild(element);
 
         d3Selection = select(element);
-        onSpy = spyOn(d3Selection, "on").and.callThrough();
 
         tooltipService = new TooltipServiceWrapper({
             tooltipService: hostVisualTooltip,
@@ -86,10 +91,17 @@ describe("TooltipService", () => {
 
     describe("addTooltip", () => {
         describe("events", () => {
-            let identity: ISelectionId;
+            const identity: ISelectionId = {
+                equals: () => true,
+                includes: () => true,
+                getKey: () => "mock-selection-id",
+                getSelector: () => ({}),
+                getSelectorsByColumn: () => ({}),
+                hasIdentity: () => true
+            };
             let tooltipData: VisualTooltipDataItem[];
-            let getTooltipInfoDelegate: jasmine.Spy;
-            let getDataPointIdentity: jasmine.Spy;
+            let getTooltipInfoDelegate: Mock<(args: any) => VisualTooltipDataItem[]>;
+            let getDataPointIdentity: Mock<(args: any) => ISelectionId>;
             let coordinateX: number = 50;
             let coordinateY: number = 50;
 
@@ -99,8 +111,8 @@ describe("TooltipService", () => {
                     value: "100",
                 }];
 
-                getTooltipInfoDelegate = jasmine.createSpy("getTooltipInfoDelegate", (args) => tooltipData).and.callThrough();
-                getDataPointIdentity = jasmine.createSpy("getDataPointIdentity", (args) => identity).and.callThrough();
+                getTooltipInfoDelegate = vi.fn((_args: any) => tooltipData);
+                getDataPointIdentity = vi.fn((_args: any) => identity);
 
                 tooltipService.addTooltip(
                     d3Selection,
@@ -141,22 +153,21 @@ describe("TooltipService", () => {
                         expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
                         expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
                     });
-                })
+                });
                 describe("for touch type device", () => {
-                    it("shows tooltip", (done) => {
+                    it("shows tooltip", async () => {
                         pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, coordinateX, coordinateY);
 
                         let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
 
-                        setTimeout(() => {
-                            expect(hostVisualTooltip.show).toHaveBeenCalledWith({
-                                coordinates: [coordinateX, coordinateY],
-                                isTouchEvent: true,
-                                dataItems: tooltipData,
-                                identities: [selectionId]
-                            });
-                            done();
-                        }, DefaultHandleTouchDelay);
+                        await new Promise(resolve => setTimeout(resolve, /* slightly more than handleTouchDelay */ 20));
+
+                        expect(hostVisualTooltip.show).toHaveBeenCalledWith({
+                            coordinates: [coordinateX, coordinateY],
+                            isTouchEvent: true,
+                            dataItems: tooltipData,
+                            identities: [selectionId]
+                        });
                     });
 
                     it("calls into visual to get identities and tooltip data", () => {
@@ -219,7 +230,7 @@ describe("TooltipService", () => {
                 it("does not show or move tooltip when tooltip data is null (tooltips disabled)", () => {
                     // Regression for stale-tooltip bug: when the visual returns no
                     // tooltip data, neither "show" nor "move" must reach the host.
-                    getTooltipInfoDelegate.and.returnValue(null);
+                    getTooltipInfoDelegate.mockReturnValue(null as unknown as VisualTooltipDataItem[]);
 
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
@@ -240,7 +251,7 @@ describe("TooltipService", () => {
                 it("does not reload tooltip data if reloadTooltipDataOnMouseMove is false", () => {
                     // reloadTooltipDataOnMouseMove is false by default
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
-                    getTooltipInfoDelegate.calls.reset();
+                    getTooltipInfoDelegate.mockClear();
 
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
@@ -256,7 +267,7 @@ describe("TooltipService", () => {
                     );
 
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
-                    getTooltipInfoDelegate.calls.reset();
+                    getTooltipInfoDelegate.mockClear();
 
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
@@ -284,18 +295,51 @@ describe("TooltipService", () => {
             });
 
 
-            it("mouseover does show tooltip after touchend delay", (done) => {
+            it("mouseover does show tooltip after touchend delay", async () => {
                 pointerEvent.call(element, element, PointerEventType.pointerout, PointerType.mouse, coordinateX, coordinateY);
 
-                setTimeout(() => {
-                    pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
+                await new Promise(resolve => setTimeout(resolve, /* slightly more than handleTouchDelay */ 20));
 
-                    expect(hostVisualTooltip.show).toHaveBeenCalled();
-                    done();
-                }, /* slightly more than handleTouchDelay */ 20);
+                pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
+
+                expect(hostVisualTooltip.show).toHaveBeenCalled();
             });
         });
 
+    });
+
+    describe("handleTouchDelay", () => {
+        const showTouchTooltip = (wrapper: TooltipServiceWrapper): void => {
+            wrapper.addTooltip(d3Selection, () => [{ displayName: "group", value: "100" }]);
+            d3Selection.data(["datum"]);
+
+            pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, 50, 50);
+        };
+
+        const wait = (delay: number): Promise<void> =>
+            new Promise(resolve => setTimeout(resolve, delay));
+
+        it("falls back to DefaultHandleTouchDelay when it is not specified", async () => {
+            showTouchTooltip(new TooltipServiceWrapper({
+                tooltipService: hostVisualTooltip
+            }));
+
+            await wait(DefaultHandleTouchDelay / 2);
+            expect(hostVisualTooltip.show).not.toHaveBeenCalled();
+
+            await wait(DefaultHandleTouchDelay);
+            expect(hostVisualTooltip.show).toHaveBeenCalled();
+        });
+
+        it("keeps an explicitly passed zero delay", async () => {
+            showTouchTooltip(new TooltipServiceWrapper({
+                tooltipService: hostVisualTooltip,
+                handleTouchDelay: 0
+            }));
+
+            await wait(0);
+            expect(hostVisualTooltip.show).toHaveBeenCalled();
+        });
     });
 
     describe("hide", () => {
@@ -305,11 +349,4 @@ describe("TooltipService", () => {
             expect(hostVisualTooltip.hide).toHaveBeenCalled();
         });
     });
-
-    interface IMockHostTooltipService {
-        show: jasmine.Spy;
-        move: jasmine.Spy;
-        hide: jasmine.Spy;
-        enabled: jasmine.Spy;
-    }
 });

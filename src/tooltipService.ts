@@ -25,7 +25,7 @@
 */
 import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
 import { Selection, selectAll } from "d3-selection";
-import { DefaultHandleTouchDelay } from "../constants"
+import { DefaultHandleTouchDelay } from "./constants";
 
 // powerbi.visuals
 import powerbi from "powerbi-visuals-api";
@@ -50,13 +50,13 @@ export function createTooltipServiceWrapper(
 }
 
 export class TooltipServiceWrapper implements ITooltipServiceWrapper {
-    private handleTouchTimeoutId: number;
+    private handleTouchTimeoutId: number | undefined;
     private visualHostTooltipService: ITooltipService;
     private handleTouchDelay: number;
 
     constructor(options: TooltipServiceWrapperOptions) {
         this.visualHostTooltipService = options.tooltipService;
-        this.handleTouchDelay = options.handleTouchDelay;
+        this.handleTouchDelay = options.handleTouchDelay ?? DefaultHandleTouchDelay;
     }
 
     public addTooltip<T>(
@@ -78,31 +78,37 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         // getTooltipInfoDelegate returns null).
         let isTooltipShown = false;
 
-        const callTooltip = (func: (options: TooltipMoveOptions | TooltipShowOptions) => void, event: PointerEvent, tooltipInfo: VisualTooltipDataItem[], selectionIds: ISelectionId[]): void => {
-            const coordinates = [event.clientX, event.clientY];
-            func.call(this.visualHostTooltipService, {
-                coordinates: coordinates,
-                isTouchEvent: event.pointerType === "touch",
-                dataItems: tooltipInfo,
-                identities: selectionIds
-            });
+        const buildOptions = (event: PointerEvent, tooltipInfo: VisualTooltipDataItem[] | undefined, selectionIds: ISelectionId[]): TooltipMoveOptions => ({
+            coordinates: [event.clientX, event.clientY],
+            isTouchEvent: event.pointerType === "touch",
+            dataItems: tooltipInfo,
+            identities: selectionIds
+        });
+
+        const showTooltip = (event: PointerEvent, tooltipInfo: VisualTooltipDataItem[], selectionIds: ISelectionId[]): void => {
+            const options: TooltipShowOptions = { ...buildOptions(event, tooltipInfo, selectionIds), dataItems: tooltipInfo };
+            this.visualHostTooltipService.show(options);
         };
 
-        internalSelection.on("pointerover", (event: PointerEvent, data: T) => {
-            const tooltipInfo = getTooltipInfoDelegate(data);
+        const moveTooltip = (event: PointerEvent, tooltipInfo: VisualTooltipDataItem[] | undefined, selectionIds: ISelectionId[]): void => {
+            this.visualHostTooltipService.move(buildOptions(event, tooltipInfo, selectionIds));
+        };
+
+        internalSelection.on("pointerover", (event: PointerEvent, data: unknown) => {
+            const tooltipInfo = getTooltipInfoDelegate(data as T);
             if (tooltipInfo == null) {
                 return;
             }
-            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
+            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data as T)] : [];
 
             if (event.pointerType === "mouse") {
                 isTooltipShown = true;
-                callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
+                showTooltip(event, tooltipInfo, selectionIds);
             }
             if (event.pointerType === "touch") {
                 this.handleTouchTimeoutId = window.setTimeout(() => {
                     isTooltipShown = true;
-                    callTooltip(this.visualHostTooltipService.show, event, tooltipInfo, selectionIds);
+                    showTooltip(event, tooltipInfo, selectionIds);
                     this.handleTouchTimeoutId = undefined;
                 }, this.handleTouchDelay);
             }
@@ -121,7 +127,7 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             }
         });
 
-        internalSelection.on("pointermove", (event: PointerEvent, data: T) => {
+        internalSelection.on("pointermove", (event: PointerEvent, data: unknown) => {
             if (event.pointerType !== "mouse") {
                 return;
             }
@@ -129,15 +135,16 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             if (!isTooltipShown) {
                 return;
             }
-            let tooltipInfo: VisualTooltipDataItem[];
+            // Left undefined unless reloaded, so the host keeps the data items from "show".
+            let tooltipInfo: VisualTooltipDataItem[] | undefined;
             if (reloadTooltipDataOnMouseMove) {
-                tooltipInfo = getTooltipInfoDelegate(data);
+                tooltipInfo = getTooltipInfoDelegate(data as T);
                 if (tooltipInfo == null) {
                     return;
                 }
             }
-            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data)] : [];
-            callTooltip(this.visualHostTooltipService.move, event, tooltipInfo, selectionIds);
+            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data as T)] : [];
+            moveTooltip(event, tooltipInfo, selectionIds);
         });
     }
 

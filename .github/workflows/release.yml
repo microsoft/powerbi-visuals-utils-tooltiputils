@@ -2,7 +2,7 @@ name: release
 
 on:
   release:
-    types: [created]
+    types: [ created ]
 
 permissions:
   contents: write
@@ -12,42 +12,46 @@ jobs:
     environment: automated-release
     runs-on: ubuntu-latest
 
-    env: 
-      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v6
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: 'npm'
+    - name: Use Node.js 20
+      uses: actions/setup-node@v6
+      with:
+        node-version: 20.x
+        cache: 'npm'
 
-      - name: Move release to draft
-        run: gh release edit "$TAG_NAME" --draft=true
-        env:
-          TAG_NAME: ${{ github.event.release.tag_name }}
+    - name: Move release to draft
+      run: gh release edit "$TAG_NAME" --draft=true
+      env:
+        TAG_NAME: ${{ github.event.release.tag_name }}
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Build
-        run: npm run build
+    - name: Lint
+      run: npm run lint
 
-      - name: Test
-        run: npm run test
+    - name: Build
+      run: npm run build
 
-      - name: Lint
-        run: npm run lint
+    - name: Install Playwright browser
+      run: npx playwright install --with-deps chromium
 
-      - name: Create release archive
-        run: zip -r lib.zip lib *.md LICENSE package.json -x '.*' 'lib/test/*'
+    - name: Test
+      run: npm test
 
-      - name: Upload production artifacts
-        run: |
-          gh release upload $TAG_NAME "lib.zip"
-          gh release edit $TAG_NAME --draft=false
-        env:
-          TAG_NAME: ${{ github.event.release.tag_name }}
+    - name: Create release archive
+      run: |
+        zip -r lib.zip lib *.md LICENSE package.json package-lock.json
+
+    - name: Upload production artifacts
+      run: |
+        gh release upload "$TAG_NAME" "lib.zip"
+        gh release edit "$TAG_NAME" --draft=false
+      env:
+        TAG_NAME: ${{ github.event.release.tag_name }}

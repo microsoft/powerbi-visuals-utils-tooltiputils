@@ -1,7 +1,7 @@
 node_modules
 *.log
-/typings
+typings
 /coverage
 /lib
-lib/*.map
+*.js.map
 .tmp
