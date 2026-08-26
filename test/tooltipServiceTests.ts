@@ -100,8 +100,8 @@ describe("TooltipService", () => {
                 hasIdentity: () => true
             };
             let tooltipData: VisualTooltipDataItem[];
-            let getTooltipInfoDelegate: Mock<(args: any) => VisualTooltipDataItem[]>;
-            let getDataPointIdentity: Mock<(args: any) => ISelectionId>;
+            let getTooltipInfoDelegate: Mock<(args: any, event?: PointerEvent) => VisualTooltipDataItem[]>;
+            let getDataPointIdentity: Mock<(args: any, event?: PointerEvent) => ISelectionId>;
             let coordinateX: number = 50;
             let coordinateY: number = 50;
 
@@ -111,8 +111,8 @@ describe("TooltipService", () => {
                     value: "100",
                 }];
 
-                getTooltipInfoDelegate = vi.fn((_args: any) => tooltipData);
-                getDataPointIdentity = vi.fn((_args: any) => identity);
+                getTooltipInfoDelegate = vi.fn((_args: any, _event?: PointerEvent) => tooltipData);
+                getDataPointIdentity = vi.fn((_args: any, _event?: PointerEvent) => identity);
 
                 tooltipService.addTooltip(
                     d3Selection,
@@ -141,8 +141,9 @@ describe("TooltipService", () => {
                     it("calls into visual to get identities and tooltip data", () => {
                         pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
 
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
+                        expect(getTooltipInfoDelegate.mock.calls[0][1]).toBe(getDataPointIdentity.mock.calls[0][1]);
                     });
 
                     it("calls into visual even when no data", () => {
@@ -150,8 +151,8 @@ describe("TooltipService", () => {
 
                         pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
 
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
                     });
                 });
                 describe("for touch type device", () => {
@@ -173,8 +174,8 @@ describe("TooltipService", () => {
                     it("calls into visual to get identities and tooltip data", () => {
                         pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, coordinateX, coordinateY);
 
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
                     });
 
                     it("calls into visual even when no data", () => {
@@ -182,8 +183,8 @@ describe("TooltipService", () => {
 
                         pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.touch, coordinateX, coordinateY);
 
-                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
-                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                        expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
+                        expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
                     });
                 });
             });
@@ -208,7 +209,7 @@ describe("TooltipService", () => {
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
-                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
                 });
 
                 it("calls into visual to get identities even when no data", () => {
@@ -217,7 +218,7 @@ describe("TooltipService", () => {
                     pointerEvent.call(element, element, PointerEventType.pointerover, PointerType.mouse, coordinateX, coordinateY);
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
-                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum());
+                    expect(getDataPointIdentity).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
                 });
 
                 it("does not move tooltip without a preceding pointerover (show)", () => {
@@ -272,8 +273,11 @@ describe("TooltipService", () => {
                     pointerEvent.call(element, element, PointerEventType.pointermove, PointerType.mouse, coordinateX, coordinateY);
 
                     let selectionId: ISelectionId = getDataPointIdentity(d3Selection.datum());
+                    const pointerMoveIdentityCall = getDataPointIdentity.mock.calls[getDataPointIdentity.mock.calls.length - 2];
 
-                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum());
+                    expect(getTooltipInfoDelegate).toHaveBeenCalledWith(d3Selection.datum(), expect.any(PointerEvent));
+                    expect(pointerMoveIdentityCall).toEqual([d3Selection.datum(), expect.any(PointerEvent)]);
+                    expect(getTooltipInfoDelegate.mock.calls[0][1]).toBe(pointerMoveIdentityCall[1]);
                     expect(hostVisualTooltip.move).toHaveBeenCalledWith({
                         coordinates: [coordinateX, coordinateY],
                         isTouchEvent: false,

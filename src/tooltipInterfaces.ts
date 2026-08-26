@@ -27,6 +27,12 @@ import powerbi from "powerbi-visuals-api";
 import { Selection } from 'd3-selection';
 import ITooltipService = powerbi.extensibility.ITooltipService;
 
+/** The event's currentTarget is valid only while the delegate is executing synchronously. */
+export type TooltipInfoDelegate<T> = (datapoint: T, event?: PointerEvent) => powerbi.extensibility.VisualTooltipDataItem[];
+
+/** The event's currentTarget is valid only while the delegate is executing synchronously. */
+export type TooltipIdentityDelegate<T> = (datapoint: T, event?: PointerEvent) => powerbi.extensibility.ISelectionId;
+
 export interface TooltipEventArgs<TData> {
     data: TData;
     coordinates: number[];
@@ -38,8 +44,8 @@ export interface TooltipEventArgs<TData> {
 export interface ITooltipServiceWrapper {
     addTooltip<T>(
         selection: Selection<any, any, any, any>,
-        getTooltipInfoDelegate: (datapoint: T) => powerbi.extensibility.VisualTooltipDataItem[],
-        getDataPointIdentity?: (datapoint: T) => powerbi.extensibility.ISelectionId,
+        getTooltipInfoDelegate: TooltipInfoDelegate<T>,
+        getDataPointIdentity?: TooltipIdentityDelegate<T>,
         reloadTooltipDataOnMouseMove?: boolean): void;
     hide(): void;
     cancelTouchTimeoutEvents(): void;

@@ -1,3 +1,8 @@
+## 7.1.0
+
+### Added
+* Tooltip information and identity delegates now receive the originating `PointerEvent` as an optional second argument on `pointerover` and `pointermove`.
+
 ## 7.0.0
 
 ### Breaking changes
