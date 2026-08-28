@@ -28,10 +28,10 @@ import { Selection } from 'd3-selection';
 import ITooltipService = powerbi.extensibility.ITooltipService;
 
 /** The event's currentTarget is valid only while the delegate is executing synchronously. */
-export type TooltipInfoDelegate<T> = (datapoint: T, event?: PointerEvent) => powerbi.extensibility.VisualTooltipDataItem[];
+export type TooltipInfoDelegate<T> = (datapoint: T, event: PointerEvent) => powerbi.extensibility.VisualTooltipDataItem[] | null;
 
 /** The event's currentTarget is valid only while the delegate is executing synchronously. */
-export type TooltipIdentityDelegate<T> = (datapoint: T, event?: PointerEvent) => powerbi.extensibility.ISelectionId;
+export type TooltipIdentityDelegate<T> = (datapoint: T, event: PointerEvent) => powerbi.extensibility.ISelectionId;
 
 export interface TooltipEventArgs<TData> {
     data: TData;
