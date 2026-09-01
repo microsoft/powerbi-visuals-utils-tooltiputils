@@ -1,3 +1,11 @@
+## 7.1.0
+
+### Added
+* Tooltip information and identity delegates now receive the originating `PointerEvent` as a second argument on `pointerover` and `pointermove`.
+
+### Compatibility
+* Existing single-parameter delegates are unaffected. Delegates that already use a second parameter for another purpose must be updated because that parameter now receives the `PointerEvent` at runtime.
+
 ## 7.0.0
 
 ### Breaking changes

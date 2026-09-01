@@ -23,15 +23,19 @@
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 *  THE SOFTWARE.
 */
-import { ITooltipServiceWrapper, TooltipServiceWrapperOptions } from "./tooltipInterfaces";
+import {
+    ITooltipServiceWrapper,
+    TooltipIdentityDelegate,
+    TooltipInfoDelegate,
+    TooltipServiceWrapperOptions
+} from "./tooltipInterfaces";
 import { Selection, selectAll } from "d3-selection";
 import { DefaultHandleTouchDelay } from "./constants";
 
-// powerbi.visuals
 import powerbi from "powerbi-visuals-api";
-import ISelectionId = powerbi.visuals.ISelectionId;
 
 // powerbi.extensibility
+import ISelectionId = powerbi.extensibility.ISelectionId;
 import ITooltipService = powerbi.extensibility.ITooltipService;
 import VisualTooltipDataItem = powerbi.extensibility.VisualTooltipDataItem;
 import TooltipMoveOptions = powerbi.extensibility.TooltipMoveOptions;
@@ -61,8 +65,8 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
 
     public addTooltip<T>(
         selection: Selection<any, any, any, any>,
-        getTooltipInfoDelegate: (datapoint: T) => VisualTooltipDataItem[],
-        getDataPointIdentity?: (datapoint: T) => ISelectionId,
+        getTooltipInfoDelegate: TooltipInfoDelegate<T>,
+        getDataPointIdentity?: TooltipIdentityDelegate<T>,
         reloadTooltipDataOnMouseMove?: boolean): void {
 
         if (!selection || !this.visualHostTooltipService.enabled()) {
@@ -95,11 +99,13 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
         };
 
         internalSelection.on("pointerover", (event: PointerEvent, data: unknown) => {
-            const tooltipInfo = getTooltipInfoDelegate(data as T);
+            const tooltipInfo = getTooltipInfoDelegate(data as T, event);
             if (tooltipInfo == null) {
                 return;
             }
-            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data as T)] : [];
+            const selectionIds: ISelectionId[] = getDataPointIdentity
+                ? [getDataPointIdentity(data as T, event)]
+                : [];
 
             if (event.pointerType === "mouse") {
                 isTooltipShown = true;
@@ -138,12 +144,15 @@ export class TooltipServiceWrapper implements ITooltipServiceWrapper {
             // Left undefined unless reloaded, so the host keeps the data items from "show".
             let tooltipInfo: VisualTooltipDataItem[] | undefined;
             if (reloadTooltipDataOnMouseMove) {
-                tooltipInfo = getTooltipInfoDelegate(data as T);
-                if (tooltipInfo == null) {
+                const reloadedTooltipInfo = getTooltipInfoDelegate(data as T, event);
+                if (reloadedTooltipInfo == null) {
                     return;
                 }
+                tooltipInfo = reloadedTooltipInfo;
             }
-            const selectionIds: ISelectionId[] = getDataPointIdentity ? [getDataPointIdentity(data as T)] : [];
+            const selectionIds: ISelectionId[] = getDataPointIdentity
+                ? [getDataPointIdentity(data as T, event)]
+                : [];
             moveTooltip(event, tooltipInfo, selectionIds);
         });
     }
